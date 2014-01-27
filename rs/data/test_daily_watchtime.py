@@ -5,10 +5,10 @@ Created on Jan 24, 2014
 '''
 
 import sys;
-from visualization.histgram import histplot;
+from rs.visualization.histgram import histplot;
 
 
-from data.daily_watchtime import DailyWatchTimeReader
+from rs.data.daily_watchtime import DailyWatchTimeReader
 
 if __name__ == '__main__':
     #filename = "../datasample/agg_duid_pid_watchtime_genre/20131209_100000";

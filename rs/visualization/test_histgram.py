@@ -5,7 +5,7 @@ Created on Jan 24, 2014
 '''
 
 import numpy as np;
-from visualization.histgram import histplot;
+from rs.visualization.histgram import histplot;
 
 
 if __name__ == '__main__':
