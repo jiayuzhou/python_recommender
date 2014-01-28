@@ -5,7 +5,7 @@ Created on Jan 24, 2014
 '''
 
 import sys;
-from rs.visualization.histgram import histplot;
+from rs.visualization.histgram import histplot; #@UnusedImport
 
 
 from rs.data.daily_watchtime import DailyWatchTimeReader

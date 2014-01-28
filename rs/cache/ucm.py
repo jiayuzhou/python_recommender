@@ -17,25 +17,15 @@ RTYPE_RESULT = 'rt_result';
 
 class UCManager(object):
     '''
-    classdocs
+    Universal cache/resource manager. 
     '''
 
     _instance = None;
 
     DefaultCacheFolder = '/tmp/recsys'; #default cache folder
 
-    def __new__(cls, *args, **kwargs):
-        '''
-        Singleton allow only one instance to be created. 
-        Pattern reference:
-        http://stackoverflow.com/questions/42558/python-and-the-singleton-pattern
-        '''
-        if not cls._instance:
-            cls._instance = super(UCManager, cls).__new__(
-                                cls, *args, **kwargs)
-        return cls._instance;
 
-    def __init__(self, cache_folder = UCManager.DefaultCacheFolder):
+    def __init__(self, cache_folder = None):
         '''
         Create a cache manager with the specified cache location. 
         '''
@@ -43,19 +33,30 @@ class UCManager(object):
         if not os.path.exists(self.cacheLocation):
             os.makedirs(self.cacheLocation);
     
-    def universalFile(self, resource_type, unique_resource_str):
-        
-        pass;
-    
-    def getCache(self, resource_type, unique_resource_str):
-        
-        pass;
-    
-    def putCache(self, resource_type, unique_resource_str, content):
+    @classmethod
+    def universalFile(cls, resource_type, unique_resource_str):
+        '''
+        Get the representation of file.
+        '''
         
         pass;
     
     @classmethod
-    def getInstance(cls):
+    def getCache(cls, resource_type, unique_resource_str):
+        
+        pass;
+    
+    @classmethod
+    def putCache(cls, resource_type, unique_resource_str, content):
+        
+        pass;
+    
+    @classmethod
+    def GetInstance(cls):
+        '''
+        Get the factory/global instance of UCManager.
+        '''
+        if not cls._instance:
+            cls._instance = UCManager();
         return cls._instance;
             
