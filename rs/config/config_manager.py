@@ -19,6 +19,8 @@ CFG_EXPRESULT_TMPFOLDER = 'cfg_expresult_folder';
 
 CFG_SEC_UTILS          = 'cfg_seg_utils';
 CFG_UTILS_LOGFOLDER    = 'cfg_utils_logfolder';
+CFG_UTILS_USECACHE     = 'cfg_utils_use_cahce';
+CFG_UTILS_CACHEFOLDER  = 'cfg_utils_cache_dir';
 
 class ConfigManager(object):
     '''
@@ -26,7 +28,7 @@ class ConfigManager(object):
     This is a factory class and to access config use GetInstance().
     '''
     
-    _instance = None; #factory. 
+    _instance = None; #factory instance. 
     
     DEFAULT_CFG_FILE = os.path.dirname(os.path.realpath(__file__)) + '/' + 'default.cfg';
 
@@ -63,4 +65,15 @@ class ConfigManager(object):
     @classmethod
     def Get(cls, section, option):
         return cls.GetInstance().config.get(section, option);
+    
+    @classmethod
+    def GetBoolean(cls, section, option):
+        return cls.GetInstance().config.getboolean(section, option);
+    
+    @classmethod
+    def GetInt(cls, section, option):
+        return cls.GetInstance().config.getint(section, option);
         
+    @classmethod
+    def GetFloat(cls, section, option):
+        return cls.GetInstance().config.getfloat(section, option);

@@ -24,6 +24,9 @@ if __name__ == '__main__':
     # add utility related configurations. 
     config.add_section(CFG_SEC_UTILS);
     config.set(CFG_SEC_UTILS,     CFG_UTILS_LOGFOLDER,     '/tmp/recsys/rs/logfiles');
+    config.set(CFG_SEC_UTILS,     CFG_UTILS_CACHEFOLDER,   '/tmp/recsys/rs/cache'); 
+    config.set(CFG_SEC_UTILS,     CFG_UTILS_USECACHE,      True);
+    #config.set(CFG_SEC_UTILS,     CFG_UTILS_USECACHE,      False);
     
     with open('default.cfg', 'wb') as configfile:
         config.write(configfile);

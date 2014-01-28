@@ -5,7 +5,7 @@ Created on Jan 24, 2014
 '''        
 
 import csv;        
-
+from rs.cache.urm import URM;
 
 class DailyWatchTimeReader(object):
 
@@ -72,19 +72,29 @@ class DailyWatchTimeReader(object):
         This method first goes through the data once, and filter out 
         the device and program that has occurrences below specified values. 
         '''
-        print 'Computing data information...';
-        [occur_duid, occur_pid, _, _] = self.readFileInfo(filename);
-        print str(len(occur_duid)), 'devices', str(len(occur_pid)), 'programs';
         
-        print 'Filtering...'
-        duidlist = set([sel_duid for sel_duid, sel_duidcnt in occur_duid.iteritems() if sel_duidcnt > min_duid]);
-        pidlist  = set([sel_pid  for sel_pid,  sel_pidcnt  in occur_pid.iteritems()  if sel_pidcnt  > min_pid]);
+        res_str  = 'DWT_RFWMV[' + filename + '][MIN DUID' + str(min_duid) + '][MIN PID' + str(min_pid) +']';
         
-        print 'After filtering [MIN_DUID',str(min_duid), ' MIN_PID:', str(min_pid),']:',\
-            str(len(occur_duid)), 'devices', str(len(occur_pid)), 'programs';
-        [mapping_duid, mapping_pid, row, col, data] = self.readFileWithIDList(filename, duidlist, pidlist);
-        print 'Done';
-        return [mapping_duid, mapping_pid, row, col, data];
+        # We check if the current resource is available. If not then load from test data and save resource.  
+        if not URM.CheckResource(URM.RTYPE_DATA, res_str): 
+        
+            print 'Computing data information...';
+            [occur_duid, occur_pid, _, _] = self.readFileInfo(filename);
+            print str(len(occur_duid)), 'devices', str(len(occur_pid)), 'programs';
+            
+            print 'Filtering...'
+            duidlist = set([sel_duid for sel_duid, sel_duidcnt in occur_duid.iteritems() if sel_duidcnt > min_duid]);
+            pidlist  = set([sel_pid  for sel_pid,  sel_pidcnt  in occur_pid.iteritems()  if sel_pidcnt  > min_pid]);
+            
+            print 'After filtering [MIN_DUID',str(min_duid), ' MIN_PID:', str(min_pid),']:',\
+                str(len(occur_duid)), 'devices', str(len(occur_pid)), 'programs';
+            [mapping_duid, mapping_pid, row, col, data] = self.readFileWithIDList(filename, duidlist, pidlist);
+            print 'Done';
+            
+            URM.SaveResource(URM.RTYPE_DATA, res_str, [mapping_duid, mapping_pid, row, col, data]);
+            return [mapping_duid, mapping_pid, row, col, data];
+        else:
+            return URM.LoadResource(URM.RTYPE_DATA, res_str);
     
     
     def readFileWithIDList(self, filename, duidlist, pidlist):

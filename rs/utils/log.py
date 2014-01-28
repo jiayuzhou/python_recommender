@@ -8,10 +8,23 @@ import logging;
 from rs.config.config_manager import *; #@UnusedWildImport
 from rs.utils.dir import check_create_dir;
 
+
+
 class Logger(object):
     '''
-    Logging
+    Logging. 
+    
+    This is a factory method. Use cases:
+    Logger.Log('Hello world');
+    Logger.Log('A system message', Logger.MSG_CATEGORY_SYSTEM);
+    
     '''
+    
+    # Some constants for categories. 
+    MSG_CATEGORY_SYSTEM = 'SYSTEM';
+    MSG_CATEGORY_DATA   = 'DATA';
+    MSG_CATEGORY_EXP    = 'EXPERIMENT';
+    MSG_CATEGORY_DEFAULT = 'DEFAULT';
     
     _instance = None;
     
@@ -35,26 +48,23 @@ class Logger(object):
         
         self.logfolder = configDir if logfolder is None else logfolder;
         
-        check_create_dir(logfolder, True); # create folder for log file. 
+        check_create_dir(self.logfolder, True); # create folder for log file. 
         
         self.logfile = '%s/%s.log' % (self.logfolder, Logger.GetTimeString() );
         logging.basicConfig(filename=self.logfile,level=logging.INFO)
         
         self.display_level = display_level;
         
-        print 'Initialize log file:', self.logfile;
-        logging.info('I told you so')
-        
-        
-        
-        
-    def __exit__(self, type, value, traceback):
-        pass; #clean files. 
-    
+        message_str = 'Initialize log file:' + self.logfile;
+        #logging.info(message_str);
+        self._log(message_str, 'SYSTEM', 0);
     
     def _log(self, message, category, display_level):
         '''
-        
+        In this method we first construct a message string. 
+        The message string is logged using a system logger.
+        And depending on the display level, print out the message on the screen or 
+        keep silent. 
         '''
         message_str = '['+ Logger.GetTimeString() + '][' + category + ']'\
                       + message;
@@ -75,6 +85,9 @@ class Logger(object):
     
     @classmethod
     def Log(cls, message, category = 'DEFAULT', display_level = 0):
+        
+        category = cls.MSG_CATEGORY_DEFAULT if category is None else category;
+        
         cls.GetInstance()._log(message, category,display_level);
         
         

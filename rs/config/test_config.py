@@ -16,3 +16,10 @@ if __name__ == '__main__':
     
     print ConfigManager.Get(CFG_SEC_DATA, CFG_DATA_TMPFOLDER);
     print ConfigManager.Get(CFG_SEC_UTILS, CFG_UTILS_LOGFOLDER);
+    
+    if ConfigManager.GetBoolean(CFG_SEC_UTILS, CFG_UTILS_USECACHE):
+        print 'Use cache';
+        
+    if not ConfigManager.GetBoolean(CFG_SEC_UTILS, CFG_UTILS_USECACHE):
+        print 'Not use cache';
+    

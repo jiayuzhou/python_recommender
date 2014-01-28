@@ -11,8 +11,8 @@ from rs.visualization.histgram import histplot; #@UnusedImport
 from rs.data.daily_watchtime import DailyWatchTimeReader
 
 if __name__ == '__main__':
-    filename = "../../datasample/agg_duid_pid_watchtime_genre/20131209_100000";
-    #filename = "/Users/jiayu.zhou/Data/duid-program-watchTime-genre/20131209/part-r-00000";
+    #filename = "../../datasample/agg_duid_pid_watchtime_genre/20131209_100000";
+    filename = "/Users/jiayu.zhou/Data/duid-program-watchTime-genre/20131209/part-r-00000";
     
     if len(sys.argv) == 1:
         print 'Use default sample data.'
@@ -32,6 +32,6 @@ if __name__ == '__main__':
     #histplot(occur_duid.values());
     #histplot(occur_pid.values());
     
-    
+    print 'Done';
     
 # data: 
