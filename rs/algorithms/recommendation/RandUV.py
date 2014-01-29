@@ -26,24 +26,24 @@ class RandUV(CFAlg):
         
         self.verbose = verbose;
         
-    def train(self, feedbackData):
+    def train(self, feedback_data):
         '''
-        Train the model with specified feedbackData. 
+        Train the model with specified feedback_data. 
         WARNING: calling this function will erase previous training information. 
         
         Parameters
         ----------
-        Feedback data structure in rs.data.recdata.FeedbackData
+        feedback_data: feedback data structure in rs.data.recdata.FeedbackData
          
         Returns
         ----------
-        return is optional. 
+        no return.
         '''
         if self.verbose:
             log('training dummy algorithm.');
         
-        m = feedbackData.num_row;
-        n = feedbackData.num_col;  
+        m = feedback_data.num_row;
+        n = feedback_data.num_col;  
         r = self.latent_factor;
         
         self.row = m;
@@ -67,8 +67,9 @@ class RandUV(CFAlg):
         
         Returns
         __________
-        return a list of results at specified locations.   
+        return a list of results (predicted values) at specified locations.   
         '''
+        
         if not (len(row_idx_arr) == len(col_idx_arr)):
             raise ValueError("The col/row indices of the location should be the same.");
         

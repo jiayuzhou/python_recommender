@@ -1,0 +1,382 @@
+GENRE_ID,GENRE_NAME,GENRE_REP_ID,DB_GENRE_IMG_ID
+1,Action/adventure,1,8770
+3,Animated,1,8771
+5,"Arts & Literature",11,8772
+6,Awards,4,8774
+7,Biography,10,8775
+8,"Business & Finance",11,8777
+9,Comedy,1,8778
+10,Comedy-drama,1,8779
+11,"Crime drama",1,8780
+12,Documentary,10,8781
+13,Drama,1,8782
+14,Educational,9,8783
+15,Entertainment,4,8784
+16,Fantasy,1,8786
+17,Food,6,8787
+18,"Game show",4,8789
+19,"Health & Fitness",6,8790
+20,History,10,8791
+21,"Hobbies & Crafts",6,8792
+22,"Home & Garden",6,8793
+23,Horror,1,8794
+24,Magazine,,8795
+25,music,7,9004
+26,"Music videos",7,8796
+27,musical,7,9005
+28,Nature,10,8799
+29,Newscast,8,8800
+30,Newsmagazine,8,8801
+31,Other,,8802
+32,Outdoors,6,8803
+33,paranormal,10,9018
+34,Reality,10,8804
+35,Religion,,8805
+36,"Science & Technology",10,8808
+37,Sci-fi,1,8807
+38,Shopping,12,8810
+39,Sports,8,8811
+40,Talk,4,8812
+41,Travel,6,8814
+42,"2006 election",,8764
+43,"2008 presidential",,8765
+44,election,,8908
+45,adaptation,2,8816
+46,"adventure racing",5,8819
+47,advice,,8820
+48,agriculture,1,8821
+49,all-star,4,8822
+50,alternative,,8823
+51,animals,10,8824
+52,"animated comedy",1,8825
+53,anime,3,8826
+54,anthology,11,8827
+55,archery,5,8828
+56,"arm wrestling",5,8830
+58,auction,11,8831
+59,"audio only",,8832
+60,"auto info",11,8833
+61,"auto racing",5,8834
+62,aviation,,8835
+63,badminton,5,8836
+64,ballet,6,8837
+65,baseball,5,8838
+66,basketball,5,8839
+67,biathlon,5,8842
+68,"bicycle motocross",5,8843
+69,bicycling,6,8844
+70,"big band ",7,8846
+71,"black comedy",1,8848
+72,bluegrass,7,8849
+73,blues,7,8850
+74,boating,5,8851
+75,bobsledding,5,8852
+76,bodybuilding,5,8853
+77,bowling,5,8854
+78,boxing,5,8855
+79,bullfighting,5,8856
+80,business,11,8857
+81,cajun/zydeco,7,8858
+82,canoeing,5,8859
+83,"card game",6,8860
+84,cartoon,3,8861
+85,cheerleading,5,8863
+86,"chick flick",2,8864
+87,children,1,8865
+88,christmas,11,8866
+89,"cinco de mayo",11,8867
+90,circus,4,8868
+91,"classical music",7,8870
+92,classifieds,,8871
+93,collectibles,6,8872
+94,college,9,8873
+95,"coming of age",,8874
+96,commentary,,8875
+97,compilation,7,8876
+98,computers,11,8877
+99,concert,7,8878
+100,cooking,6,8881
+101,costumer,11,8882
+102,"country music",7,8884
+103,courtroom,,8885
+104,crafts,6,8886
+105,cricket,5,8887
+106,crime,1,8888
+107,"cult classic",7,8889
+108,curling,5,8890
+109,"current affairs",10,8891
+110,dance,7,8892
+111,debate,10,8895
+112,debut,7,8896
+113,"disco ",7,8898
+114,diving,5,8901
+115,docudrama,1,8902
+116,"dog racing",5,8903
+117,"dog show",11,8904
+118,"drag racing",5,8905
+119,easter,11,8906
+120,"easy listening",7,8907
+122,environment,10,8911
+123,equestrian,5,8913
+124,espionage,,8914
+125,ethnic/world,7,8915
+126,"extreme sports",5,8918
+127,Family,,8785
+128,fashion,11,8919
+129,"fathers day",11,8920
+130,fencing,5,8921
+131,"field hockey",5,8922
+132,"figure skating",5,8923
+133,"filmed on location",2,8924
+134,finance,11,8925
+135,"fine arts",11,8926
+136,fishing,6,8928
+137,fitness,6,8929
+138,"folk music",7,8930
+139,football,5,8931
+140,full-contact,,8932
+141,fundraiser/telethon,4,8933
+142,funk,7,8934
+143,gardening,6,8935
+144,"gay and lesbian",,8936
+145,golf,5,8938
+146,"gospel music",7,8939
+147,government,,8941
+148,"guy flick",2,8943
+149,gymnastics,5,8944
+150,halloween,11,8945
+151,handball,5,8946
+152,hanukkah,11,8947
+153,health,,8948
+154,"heavy metal",7,8949
+155,"high school",9,8950
+156,highlights,,8951
+157,"hip-hop ",7,8952
+158,hockey,5,8955
+159,"home projects",6,8956
+160,"horse racing",6,8957
+161,hospital,11,8958
+162,how-to,9,8959
+163,hunting,6,8960
+164,"ice skating",5,8962
+165,"in-line skating",5,8965
+166,infomercial,,8966
+167,instruction,9,8967
+168,interview,4,8969
+169,"jai alai",5,8970
+170,jazz,7,8971
+171,"july 4th",11,8974
+172,kayaking,5,8975
+173,kwanzaa,11,8976
+174,"labor day",11,8977
+175,lacrosse,5,8978
+176,latin,7,8980
+177,"little league",5,8983
+178,local,10,8984
+179,luge,5,8985
+180,magic,4,8987
+181,marathon,5,8989
+182,"mardi gras",11,8990
+183,"martia arts",5,8992
+184,medicine,11,8994
+185,"memorial day",11,8995
+186,"minor league",5,8997
+187,"ml king day",11,8998
+188,"mothers day",11,9000
+189,"motor sports",5,9001
+190,"motorcycle racing",5,9002
+191,"mountain biking",5,9003
+193,mystery,1,9006
+195,"new age",7,9007
+196,"new wave ",7,9009
+197,"new years day",11,9011
+198,"new years eve",11,9012
+199,olympic-style,5,9013
+200,olympics,5,9014
+201,opera,7,9015
+202,pageant,4,9016
+203,parade,11,9017
+204,parenting,11,9019
+205,passover,11,9021
+206,performance,11,9022
+207,pets,6,9023
+208,pilot,,9025
+209,play,11,9026
+210,playoffs,5,9027
+211,police,,9029
+212,politics,,9030
+213,polo,5,9031
+214,pool,5,9032
+215,pop,7,9033
+216,"pop culture classic",7,9034
+217,"powerboat racing",5,9035
+218,prequel,2,9036
+219,preschool,9,9037
+220,pro,,9039
+221,"pro wrestling",5,9040
+222,profile,,9041
+223,psychology,11,9042
+224,"public affairs",10,9043
+225,puppets,11,9044
+226,r&b,7,9045
+227,racquetball,5,9046
+228,ramadan,11,9047
+229,"real estate",11,9048
+230,reggae,7,9051
+231,remake,2,9052
+232,retrospective,11,9053
+233,"reviews (critics)",10,9054
+234,rock,7,9055
+235,rodeo,6,9056
+236,roller,5,9058
+237,Romance,1,8806
+238,"rosh hashana",11,9060
+239,rowing,5,9061
+240,rugby,5,9062
+241,running,5,9063
+242,satire,11,9064
+243,science,10,9066
+244,"senior citizens",,9067
+245,"September 11",,8809
+246,sequel,2,9068
+247,serial,1,9069
+248,"series finale",1,9070
+249,shooting,6,9071
+250,"short subject",2,9072
+251,"show tunes",11,9073
+252,silent,2,9074
+253,sitcom,1,9075
+254,ska,7,9076
+255,skateboarding,5,9077
+256,skeleton,5,9078
+257,skiing,5,9079
+258,"smooth jazz",7,9081
+259,snowboarding,5,9082
+260,snowmobiling,5,9083
+261,"soap opera",1,9084
+262,soccer,5,9085
+263,"soft rock",7,9086
+264,softball,5,9087
+265,soul,7,9088
+266,special,,9090
+267,speedskating,5,9091
+268,spin-off,,9092
+269,"sports stuff",12,9093
+270,squash,5,9094
+271,"st patricks day",11,9095
+272,"stand-up comedy",11,9096
+273,"summer olympics",5,9097
+274,"sumo wrestling",5,9098
+275,surfing,5,9099
+276,suspense/thriller,1,9100
+277,swimming,5,9101
+278,"table tennis",5,9102
+279,tabloid,8,9103
+280,"talent contest",4,9104
+281,taxes,11,9105
+282,techno,7,9106
+283,technology,10,9107
+284,teens,1,9108
+285,telecourse,9,9109
+286,tennis,5,9110
+287,thanksgiving,11,9111
+288,theatre,4,9112
+289,"track ",,9116
+290,trains,,9119
+291,triathlon,5,9120
+292,tribute,,9121
+293,"truck competition",,9122
+294,"valentines day",11,9125
+296,variety,4,9126
+297,"veterans day",11,9127
+298,"video games",6,9128
+299,vocalists,7,9129
+300,volleyball,5,9130
+301,war,,9131
+302,"water polo",5,9132
+303,"water skiing",5,9133
+304,"water sports",5,9134
+305,weather,8,9135
+306,weightlifting,5,9137
+307,western,1,9138
+308,"winter olympics",5,9139
+309,"winter sports",5,9140
+310,women,,9141
+311,wrestling,5,9142
+312,yachting,5,9143
+313,"yom kippur",11,9144
+314,"part info in copy",,9020
+315,"tvg classic",6,9123
+316,Thriller,1,8813
+317,Mystery/suspense,1,8798
+319,"2008 presidential election",,8767
+320,"2010 election",,8768
+321,3D,,8769
+322,"Australian football",5,8773
+323,Bollywood,2,8776
+324,"Gaelic football",5,8788
+325,"action sports",5,8815
+326,"adventure race",5,8817
+327,architecture,11,8829
+328,behind-the-scenes,,8840
+329,"best of",,8841
+330,"big band & swing",7,8847
+331,"celebrity sports",5,8862
+332,"classic sports",,8869
+333,construction,10,8879
+334,"contemporary christian",7,8880
+335,countdown,11,8883
+336,darts,6,8893
+337,dating,,8894
+338,decorating,6,8897
+339,"disco & dance",7,8900
+340,emo,7,8909
+341,engineering,10,8910
+342,"episode title in copy",,8912
+343,"ethnic/world music",7,8917
+344,fireworks,11,8927
+345,"generic source record",,8937
+346,goth,7,8940
+347,green,10,8942
+348,"hip-hop & rap",7,8954
+349,hurling,5,8961
+350,"ice skating (competition)",5,8963
+351,imax,2,8964
+352,internet,11,8968
+353,"jet skiing",5,8972
+354,jewelry,12,8973
+355,landscaping,6,8979
+356,legal,,8981
+357,literature,11,8982
+358,"lumberjack competition",,8986
+359,makeover,4,8988
+360,"martial arts",5,8993
+361,military,10,8996
+362,mockumentary,2,8999
+363,"new wave & punk",7,9010
+364,photography,6,9024
+365,poker,6,9028
+366,preview,,9038
+367,"reality competition",,9049
+368,"red carpet",4,9050
+369,"roller sports",5,9059
+370,"school info",9,9065
+371,"skills competition",,9080
+372,space,,9089
+373,timely,,9114
+374,"to be announced",,9115
+375,"track & field",5,9118
+376,tvgtalk,,9124
+377,wedding,,9136
+379,thriller,1,9113
+380,"2008 presidential",,8766
+381,"adventure racing",5,8818
+382,"big band ",7,8845
+383,"disco ",7,8899
+384,ethnic/world,7,8916
+385,"hip-hop ",7,8953
+386,"martia arts",5,8991
+387,"new wave ",,9008
+388,roller,5,9057
+389,"track ",,9117
+390,Music/musical,7,8797

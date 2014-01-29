@@ -73,6 +73,19 @@ class DailyWatchTimeReader(object):
         '''
         This method first goes through the data once, and filter out 
         the device and program that has occurrences below specified values. 
+        
+        Parameters
+        ----------
+        filename: a string consists of the file name and location of the data file to be read.
+        min_duid: a positive integer. the minimum occurrence of a device for the device to be included.
+        min_pid:  a positive integer. the minimum occurrence of a program for the program to be included. 
+         
+        Returns
+        ----------
+        result: a FeedbackData data structure constructed from the data file. In the result there is also 
+                a genre-program mapping data (result.meta['pggr_pg'][i], meta['pggr_pr'][i]) indicates that 
+                the program at result.meta['pggr_pg'][i] is marked by genre at meta['pggr_pr'][i]. The genre 
+                mapping is in R:/Data/Rovi/genre.csv, and a vintage copy is also kept in datasample/Rovi folder.
         '''
         
         res_str  = 'DWT_RFWMV[' + filename + '][MIN DUID' + str(min_duid) + '][MIN PID' + str(min_pid) +']';
