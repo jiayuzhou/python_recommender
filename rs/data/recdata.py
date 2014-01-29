@@ -31,7 +31,7 @@ class FeedbackData(GenericData):
         self.num_col  = num_col;
         
         self.row_mapping  = row_mapping;
-        self.item_mapping = col_mapping;
+        self.col_mapping = col_mapping;
         self.meta = meta_data;
     
     def __str__(self):

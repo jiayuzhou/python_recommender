@@ -1,4 +1,7 @@
 '''
+This example shows how to load data, build a model instance, train the model 
+using loaded data, and finally perform testing. 
+ 
 Created on Jan 29, 2014
 
 @author: jiayu.zhou
