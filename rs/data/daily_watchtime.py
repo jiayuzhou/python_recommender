@@ -6,6 +6,8 @@ Created on Jan 24, 2014
 
 import csv;        
 from rs.cache.urm import URM;
+from rs.utils.log import Logger;
+from rs.data.recdata import FeedbackData;
 
 class DailyWatchTimeReader(object):
 
@@ -47,7 +49,7 @@ class DailyWatchTimeReader(object):
         
                 lineNum+=1;
                 if self.verbose and (lineNum % self.display == 0):
-                    print str(lineNum), ' lines read.';
+                    Logger.Log(str(lineNum) + ' lines read.');
                     
         # count occurrence into bins. 
         cnt_duid = {}; # cnt_duid[number of occurrence] = number of duid with specific occurrence. 
@@ -78,24 +80,30 @@ class DailyWatchTimeReader(object):
         # We check if the current resource is available. If not then load from test data and save resource.  
         if not URM.CheckResource(URM.RTYPE_DATA, res_str): 
         
-            print 'Computing data information...';
+            Logger.Log('Computing data information...');
             [occur_duid, occur_pid, _, _] = self.readFileInfo(filename);
             print str(len(occur_duid)), 'devices', str(len(occur_pid)), 'programs';
             
-            print 'Filtering...'
+            Logger.Log('Generating filtering indices...');
             duidlist = set([sel_duid for sel_duid, sel_duidcnt in occur_duid.iteritems() if sel_duidcnt > min_duid]);
             pidlist  = set([sel_pid  for sel_pid,  sel_pidcnt  in occur_pid.iteritems()  if sel_pidcnt  > min_pid]);
-            
             print 'After filtering [MIN_DUID',str(min_duid), ' MIN_PID:', str(min_pid),']:',\
                 str(len(occur_duid)), 'devices', str(len(occur_pid)), 'programs';
-            [mapping_duid, mapping_pid, row, col, data] = self.readFileWithIDList(filename, duidlist, pidlist);
-            print 'Done';
             
-            URM.SaveResource(URM.RTYPE_DATA, res_str, [mapping_duid, mapping_pid, row, col, data]);
-            return [mapping_duid, mapping_pid, row, col, data];
+            # read the raw data file with the list.
+            [mapping_duid, mapping_pid, row, col, data, pggr_pg, pggr_gr] \
+                = self.readFileWithIDList(filename, duidlist, pidlist);
+                
+            Logger.Log('readFileWithMinVal process completed.');
+            
+            result = FeedbackData(row, col, data, len(mapping_duid), len(mapping_pid),\
+                    mapping_duid, mapping_pid, {'pggr_pg': pggr_pg, 'pggr_gr': pggr_gr});
+            
+            # save computed results to resource cache. 
+            URM.SaveResource(URM.RTYPE_DATA, res_str, result);    
+            return result;
         else:
             return URM.LoadResource(URM.RTYPE_DATA, res_str);
-    
     
     def readFileWithIDList(self, filename, duidlist, pidlist):
         '''
@@ -109,6 +117,10 @@ class DailyWatchTimeReader(object):
         row  = [];
         col  = [];
         data = [];
+        pggr_pg = [];
+        pggr_gr = [];
+        
+        visited_program_list = set([]);
         
         lineNum = 0;
         with open(filename, 'rb') as csvfile:
@@ -116,6 +128,7 @@ class DailyWatchTimeReader(object):
             for logrow in logreader:
                 log_duid      = logrow[self.fieldMapping['duid']];
                 log_pid       = logrow[self.fieldMapping['pid']];
+                log_pg_gr     = logrow[self.fieldMapping['genre']];
                 
                 ## we need both duid and pid are in the list. 
                 if (log_duid in duidlist) and (log_pid in pidlist):
@@ -130,19 +143,28 @@ class DailyWatchTimeReader(object):
                         mapping_pid[log_pid]   = len(mapping_pid);
                     col.append(mapping_pid[log_pid]);
                     
+                    # store program - genre mappings. 
+                    for pg_gr in log_pg_gr.split(','):
+                        if not pg_gr:
+                            Logger.Log('Empty genre information for program '+log_pid, Logger.MSG_CATEGORY_DATA);
+                            continue;
+                        if not mapping_pid[log_pid] in visited_program_list:
+                            pggr_pg.append(mapping_pid[log_pid]);
+                            pggr_gr.append(int(pg_gr));
+                            visited_program_list.add(mapping_pid[log_pid]);
+                    
                     data.append(log_watchtime);
                 
                 lineNum+=1;
-                #print str(lineNum), ' lines read.';
                 
                 if self.verbose and (lineNum%self.display == 0):
                     print str(lineNum), ' lines read.';
                     
         if (self.verbose):
-            print 'Done reading agg log file. '+str(len(data)) + ' elements read'+ \
-                ' ( '+str(len(mapping_duid))+' row/user, '+str(len(mapping_pid))+' col/program).';
+            Logger.Log('Done reading agg log file. '+str(len(data)) + ' elements read'+ \
+                ' ( '+str(len(mapping_duid))+' row/user, '+str(len(mapping_pid))+' col/program).');
         
-        return [mapping_duid, mapping_pid, row, col, data];
+        return [mapping_duid, mapping_pid, row, col, data, pggr_pg, pggr_gr];
         
     
     def readFile(self, filename):
@@ -153,7 +175,7 @@ class DailyWatchTimeReader(object):
         3. core sparse matrix. 
         4. a list for genre-program mapping. 
         
-        Note: this method pops data for users. 
+        Note: this method pops data for ALL users. 
         '''
         
         mapping_duid = {}; # store duid->row# mapping 
@@ -183,12 +205,11 @@ class DailyWatchTimeReader(object):
                 
                 lineNum+=1;
                 if self.verbose and (lineNum%self.display == 0):
-                    print str(lineNum), ' lines read.';
-                    
+                    Logger.Log(str(lineNum) + ' lines read.');
         
         if (self.verbose):
-            print 'Done reading agg log file. '+str(len(data)) + ' elements read'+ \
-                ' ( '+str(len(mapping_duid))+' row/user, '+str(len(mapping_pid))+' col/program).';
+            Logger.Log('Done reading agg log file. '+str(len(data)) + ' elements read'+ \
+                ' ( '+str(len(mapping_duid))+' row/user, '+str(len(mapping_pid))+' col/program).');
         
         return [mapping_duid, mapping_pid, row, col, data];
                 
