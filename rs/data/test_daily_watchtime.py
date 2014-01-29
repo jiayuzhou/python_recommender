@@ -24,8 +24,8 @@ if __name__ == '__main__':
     reader = DailyWatchTimeReader();
     #reader.readFile(filename);
     #[mapping_duid, mapping_pid, row, col, data, pggr_pg, pggr_gr] = \
-    #    reader.readFileWithMinVal(filename, 5, 5);
-    dataStruct = reader.readFileWithMinVal(filename, 1, 1);
+    #    reader.read_file_with_minval(filename, 5, 5);
+    dataStruct = reader.read_file_with_minval(filename, 1, 1);
     print dataStruct;    
     #print len(pggr_pg);
     #print len(pggr_gr);

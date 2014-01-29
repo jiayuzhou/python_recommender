@@ -16,6 +16,6 @@ Directory Structure
 - **cache** - cache/resource management
 - **config** - configurations for modules 
 - **experiments** - storing experiments. 
-- **data** - define data interface, loading and etc. 
-- **utils** - some utilities for IO.
+- **data** - define data interface, loading and data structures and interfaces. 
+- **utils** - some utilities for IO and logging.
 - **visualization** - graph plots 

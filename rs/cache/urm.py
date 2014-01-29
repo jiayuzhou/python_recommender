@@ -7,7 +7,7 @@ Created on Jan 27, 2014
 '''
 
 
-import os;
+import os; #@UnusedImport
 import hashlib;
 import cPickle as pickle;
 from rs.config.config_manager import *; #@UnusedWildImport

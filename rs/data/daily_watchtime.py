@@ -18,7 +18,7 @@ class DailyWatchTimeReader(object):
         self.verbose = True;
         self.display = 100000; # gives output after this number of lines are read. 
     
-    def readFileInfo(self, filename):
+    def read_file_info(self, filename):
         '''
         This file reads an aggregated file and get summary (occurrences) 
         for program and device. This information can be used to filtered 
@@ -69,7 +69,7 @@ class DailyWatchTimeReader(object):
         return [occur_duid, occur_pid, cnt_duid, cnt_pid];
     
     
-    def readFileWithMinVal(self, filename, min_duid, min_pid):
+    def read_file_with_minval(self, filename, min_duid, min_pid):
         '''
         This method first goes through the data once, and filter out 
         the device and program that has occurrences below specified values. 
@@ -81,7 +81,7 @@ class DailyWatchTimeReader(object):
         if not URM.CheckResource(URM.RTYPE_DATA, res_str): 
         
             Logger.Log('Computing data information...');
-            [occur_duid, occur_pid, _, _] = self.readFileInfo(filename);
+            [occur_duid, occur_pid, _, _] = self.read_file_info(filename);
             print str(len(occur_duid)), 'devices', str(len(occur_pid)), 'programs';
             
             Logger.Log('Generating filtering indices...');
@@ -92,9 +92,9 @@ class DailyWatchTimeReader(object):
             
             # read the raw data file with the list.
             [mapping_duid, mapping_pid, row, col, data, pggr_pg, pggr_gr] \
-                = self.readFileWithIDList(filename, duidlist, pidlist);
+                = self.read_file_with_id_list(filename, duidlist, pidlist);
                 
-            Logger.Log('readFileWithMinVal process completed.');
+            Logger.Log('read_file_with_minval process completed.');
             
             result = FeedbackData(row, col, data, len(mapping_duid), len(mapping_pid),\
                     mapping_duid, mapping_pid, {'pggr_pg': pggr_pg, 'pggr_gr': pggr_gr});
@@ -105,7 +105,7 @@ class DailyWatchTimeReader(object):
         else:
             return URM.LoadResource(URM.RTYPE_DATA, res_str);
     
-    def readFileWithIDList(self, filename, duidlist, pidlist):
+    def read_file_with_id_list(self, filename, duidlist, pidlist):
         '''
         This file reads an aggregated file. 
         The file only include the specified duid and pid.  
@@ -210,6 +210,7 @@ class DailyWatchTimeReader(object):
         if (self.verbose):
             Logger.Log('Done reading agg log file. '+str(len(data)) + ' elements read'+ \
                 ' ( '+str(len(mapping_duid))+' row/user, '+str(len(mapping_pid))+' col/program).');
+        
         
         return [mapping_duid, mapping_pid, row, col, data];
                 

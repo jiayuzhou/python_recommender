@@ -21,9 +21,10 @@ class Logger(object):
     '''
     
     # Some constants for categories. 
-    MSG_CATEGORY_SYSTEM = 'SYSTEM';
-    MSG_CATEGORY_DATA   = 'DATA';
-    MSG_CATEGORY_EXP    = 'EXPERIMENT';
+    MSG_CATEGORY_SYSTEM  = 'SYSTEM';
+    MSG_CATEGORY_ALGO    = 'ALGORITHM';
+    MSG_CATEGORY_DATA    = 'DATA';
+    MSG_CATEGORY_EXP     = 'EXPERIMENT';
     MSG_CATEGORY_DEFAULT = 'DEFAULT';
     
     _instance = None;
@@ -66,7 +67,7 @@ class Logger(object):
         And depending on the display level, print out the message on the screen or 
         keep silent. 
         '''
-        message_str = '['+ Logger.GetTimeString() + '][' + category + ']'\
+        message_str = '['+ Logger.GetTimeString() + '][' + category + '] '\
                       + message;
         
         logging.info(message_str);
