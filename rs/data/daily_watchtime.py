@@ -146,7 +146,7 @@ class DailyWatchTimeReader(object):
                 ## we need both duid and pid are in the list. 
                 if (log_duid in duidlist) and (log_pid in pidlist):
                 
-                    log_watchtime = logrow[self.fieldMapping['watchtime']];
+                    log_watchtime = int(logrow[self.fieldMapping['watchtime']]);
                     
                     if not (log_duid in mapping_duid):
                         mapping_duid[log_duid] = len(mapping_duid);
@@ -204,7 +204,7 @@ class DailyWatchTimeReader(object):
             for logrow in logreader:
                 log_duid      = logrow[self.fieldMapping['duid']];
                 log_pid       = logrow[self.fieldMapping['pid']];
-                log_watchtime = logrow[self.fieldMapping['watchtime']];
+                log_watchtime = int(logrow[self.fieldMapping['watchtime']]);
                 
                 if not (log_duid in mapping_duid):
                     mapping_duid[log_duid] = len(mapping_duid);
