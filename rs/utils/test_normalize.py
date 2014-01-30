@@ -26,6 +26,8 @@ if __name__ == '__main__':
     
     C1 = normalize_row(A);
     
+    
+    
     A = A.T
     print 'Dense A transpose:'
     print A.todense()

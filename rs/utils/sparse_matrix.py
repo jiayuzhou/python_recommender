@@ -34,7 +34,7 @@ def normalize_row(sparse_mat, minf = 0.0001):
             if math.fabs(j)<minf:
                 c.append(0)
             else:
-                c.append(1/j)
+                c.append(1/float(j))
                 
     B = sp.lil_matrix((len(c), len(c)));
     B.setdiag(c)
