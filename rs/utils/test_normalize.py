@@ -6,11 +6,15 @@ Created on Jan 29, 2014
 import scipy.sparse as sp
 import numpy as np
 import math
+from rs.utils.sparse_matrix import normalize_row;
     
 if __name__ == '__main__':    
     minf = 0.0001
     
     A = sp.coo_matrix((5,5))
+    
+    
+    
     A = A.tolil();
     
     #A = sp.lil_matrix((5,5))
@@ -19,9 +23,14 @@ if __name__ == '__main__':
     A.setdiag(b)
     print 'Dense A:'
     print A.todense()
+    
+    C1 = normalize_row(A);
+    
     A = A.T
     print 'Dense A transpose:'
     print A.todense()
+    
+    
     
     sum_of_col = A.sum(0).tolist()
     print sum_of_col
@@ -42,4 +51,8 @@ if __name__ == '__main__':
     C = A*B
     print C.todense()
     C = C.T
+    print 'Procedure'
     print C.todense()
+    
+    print 'Function'
+    print C1.todense()

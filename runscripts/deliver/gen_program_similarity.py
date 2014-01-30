@@ -12,6 +12,7 @@ Created on Jan 29, 2014
 import numpy as np;
 from scipy.sparse import coo_matrix;
 from rs.data.daily_watchtime import DailyWatchTimeReader
+from rs.utils.sparse_matrix import normalize_row;
 
 if __name__ == '__main__':
     
@@ -27,14 +28,17 @@ if __name__ == '__main__':
     # memo: if we do multiple days, we can use coo_matrix summation.  
     
     
-    # TODO: normalize data per user. 
-    
+    # normalize data per user. 
+    mat = normalize_row(mat);
     
     
     
     program_mapping = fbdata.col_mapping; # from program id to row.
      
-    program_inv_mapping = dict((y, x) for x, y in program_mapping); # allows us to find program ID from matrix position.
+    program_inv_mapping = {y: x for x, y in program_mapping.items()}; # allows us to find program ID from matrix position.
+    
+    if not (len(program_mapping) == len(program_inv_mapping)):
+        raise ValueError('Mapping inverse error!');
     
     program_num = len(program_mapping);
     
