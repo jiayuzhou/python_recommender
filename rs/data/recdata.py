@@ -5,6 +5,8 @@ Created on Jan 28, 2014
 '''
 
 from rs.data.generic_data import GenericData;
+from rs.utils.sparse_matrix import normalize_row;
+from scipy.sparse import coo_matrix;
 
 class FeedbackData(GenericData):
     '''
@@ -37,6 +39,27 @@ class FeedbackData(GenericData):
     def __str__(self):
         return 'Row#:' + str(self.num_row) + ' Col#:' + str(self.num_col) + ' Element:'+ str(len(self.data_val)); 
     
+    def normalize_row(self):
+        '''
+        Perform a normalization on the row. This will modify the row/col/val.
+        The method first construct a coo sparse matrix and then convert to lil 
+        matrix for normalization. The normalized matrix is then converted back to 
+        coo matrix and row/col/val are reset to the values in the converted coo matrix. 
+        
+        NOTE: when we have (row, col, 0.1) and (row, col, 0.2), and we will have 
+              (row, col, 0.3), because coo to lil transformation.  
+        '''
+        mat = coo_matrix((self.data_val, (self.data_row, self.data_col)), \
+                     shape = (self.num_row, self.num_col));
+        mat = normalize_row(mat);
+        mat = mat.tocoo();
+        
+        self.data_val = mat.data.tolist();
+        self.data_row = mat.row.tolist();
+        self.data_col = mat.col.tolist();
+        
+        
+        
     def subsample_row(self, user_number):
         '''
         subsample the data of a set of users.  

@@ -38,6 +38,9 @@ if __name__ == '__main__':
     #histplot(occur_duid.values());
     #histplot(occur_pid.values());
     
+    dataStruct.normalize_row();
+    print dataStruct.data_val;
+    
     print 'Done';
     
 # data: 
