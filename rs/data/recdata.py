@@ -7,6 +7,7 @@ Created on Jan 28, 2014
 from rs.data.generic_data import GenericData;
 from rs.utils.sparse_matrix import normalize_row;
 from scipy.sparse import coo_matrix;
+import random
 
 class FeedbackData(GenericData):
     '''
@@ -37,12 +38,17 @@ class FeedbackData(GenericData):
         self.meta = meta_data;
     
     def __str__(self):
-        return 'Row#:' + str(self.num_row) + ' Col#:' + str(self.num_col) + ' Element:'+ str(len(self.data_val)); 
-    
+        return 'Row#:' + str(self.num_row) + ' Col#:' + str(self.num_col) + ' Element:'+ str(len(self.data_val));
+     
+    def get_sparse_matrix(self):
+        mat = coo_matrix((self.data_val, (self.data_row, self.data_col)), \
+                     shape = (self.num_row, self.num_col));
+        return mat;
+        
     def normalize_row(self):
         '''
         Perform a normalization on the row. This will modify the row/col/val.
-        The method first construct a coo sparse matrix and then convert to lil 
+        The method first constructs a coo sparse matrix and then convert to lil 
         matrix for normalization. The normalized matrix is then converted back to 
         coo matrix and row/col/val are reset to the values in the converted coo matrix. 
         
@@ -62,9 +68,36 @@ class FeedbackData(GenericData):
         
     def subsample_row(self, user_number):
         '''
-        subsample the data of a set of users.  
+        randomly sub-sample the data of a given number of users. This will modify 
+        the row/col/val. 
+        The method first constructs a coo sparse matrix and then convert to csr matrix 
+        for row slicing. And then the csr matrix is converted back.
         '''
-        pass;
+        if user_number > self.num_row:
+            user_number = self.num_row;
+        
+        # construct sparse matrix using coo.
+        mat = coo_matrix((self.data_val, (self.data_row, self.data_col)), \
+                     shape = (self.num_row, self.num_col));
+                     
+        # convert to csr for fast row slicing. 
+        mat = mat.tocsr();
+        
+        # generate random sample index
+        idx = range(mat.shape[0]);
+        random.shuffle(idx);             # random permutation.
+        selidx = idx[:user_number];      # take random rows.
+        mat = mat[selidx, :];            # slice the matrix. 
+        mat = mat.tocoo();               # convert it back. 
+        
+        data_val = mat.data.tolist();
+        data_row = mat.row.tolist();
+        data_col = mat.col.tolist();
+        
+        newdata = FeedbackData(data_row, data_col, data_val, user_number, self.num_col,\
+                  self.row_mapping, self.col_mapping, self.meta); # generate new data 
+                  
+        return [newdata, selidx];
         
     def split(self, percentage):
         '''
