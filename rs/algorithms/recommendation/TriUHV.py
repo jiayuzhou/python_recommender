@@ -1,7 +1,8 @@
 '''
-Created on Jan 29, 2014
+Created on Jan 31, 2014
 
 @author: Shiyu C. (s.chang1@partner.samsung.com)
+
 '''
 
 import numpy as np;
@@ -12,16 +13,18 @@ import scipy.linalg
 
 
 # an encapsulated logger.  
-log = lambda message: Logger.Log(LMaFit.ALG_NAME + ':'+message, Logger.MSG_CATEGORY_ALGO);
+log = lambda message: Logger.Log(TriUHV.ALG_NAME + ':'+message, Logger.MSG_CATEGORY_ALGO);
 
 
 
 
-class LMaFit(CFAlg):
+class TriUHV(CFAlg):
     '''
     A random guess recommender (demo).
     '''
-    ALG_NAME = 'LMaFit';
+    ALG_NAME = 'TriUHV';
+    
+##################################################################################################
 
     def __init__(self, latent_factor = 20, lamb = 1e-3, stop_delta = 1e-4, maxiter = 1e3, verbose = False):
         '''
@@ -37,6 +40,8 @@ class LMaFit(CFAlg):
         
         self.verbose = verbose;
         
+##################################################################################################
+        
     def train(self, feedback_data):
         '''
         Train the model with specified feedback_data. 
@@ -49,40 +54,62 @@ class LMaFit(CFAlg):
         Returns
         ----------
         no return.
+        
+        author: Shiyu C. (s.chang1@partner.samsung.com)
+        date: Jan 31, 2014
+         
         '''    
         if self.verbose:
             log('training dummy algorithm.');
         
+        # load the meta data including the genre information to properly store them 
+        meta = feedback_data.meta;
+#        row_mapping = feedback_data.row_mapping;
+#        col_mapping = feedback_data.col_mapping;
+        
         m = feedback_data.num_row;
         n = feedback_data.num_col;  
         r = self.latent_factor;
+        g = 330;
+        #print meta
+        #print type(meta['pggr_pg']);
+        #print type(meta['pggr_gr']);
+        if len(meta['pggr_pg']) != len(meta['pggr_gr']):
+            raise ValueError("The length of the meta data mismatched.")
+        V_val = [1 for i in range(len(meta['pggr_pg']))];
+        # print V_val 
+            
         lamb = self.lamb;
         delta = self.delta;
         maxiter = self.maxiter;
-        
+                
         self.row = m;
         self.col = n;
         
-        # U, V should be stored in numpy.matrix form. 
-        # initialization of U, V and S_sparse
+        # U, H, V should be stored in numpy.matrix form. 
+        # initialization of U, H, V and S_sparse
         U = np.matrix(np.random.rand(m, r));
-        V = np.matrix(np.random.rand(r,n));   
-        
-        feedback_data.normalize_row();     
+        H = np.matrix(np.random.rand(r,g));
+        V = scipy.sparse.coo_matrix((V_val,(meta['pggr_gr'],meta['pggr_pg'])),shape = (g,n));
+        # print V.shape
+        # print V     
         S_sparse = scipy.sparse.coo_matrix((np.array(feedback_data.data_val,dtype = np.float64),(feedback_data.data_row,feedback_data.data_col)),(m,n));
         # S_sparse = S_sparse.tolil();
-        print S_sparse.row
+        # print S_sparse.row
 
         ###############################
         # the main learning process
-        [U,V,S_sparse] = LMaFit.LowRankFitting (S_sparse,U,V,feedback_data,lamb,delta,maxiter);
+        # [U,V,S_sparse] = TriUHV.LowRankFitting (S_sparse,U,V,feedback_data,lamb,delta,maxiter);
         
         self.U = U;
+        self.H = H;
         self.V = V;
         self.S_sparse = S_sparse;
         
         if self.verbose:
             log('dummy algorithm trained.');
+            
+##################################################################################################
     
     def predict(self, row_idx_arr, col_idx_arr):
         '''
@@ -108,9 +135,16 @@ class LMaFit(CFAlg):
         
         return result;
     
+##################################################################################################
+    
     @staticmethod
-    def LRF_learnU (S_sparse,U,U_prev,V,V_prev,lamb):
-            # fix the variable S and V solve U
+    def CGF_learnU (S_sparse,U,U_prev,V,V_prev,lamb):
+            # Usage:  Cross-Genre Factorization
+            # This function fixed S, H and V to learn a proper U
+            # author: Shiyu C. (s.chang1@partner,.samsung.com) 
+            # date: 01/31/2014
+            
+
             r = U.shape[1];
             I = np.matrix(np.ones((r,r)));
             Inv = np.linalg.inv(V*V.T + lamb*I);
@@ -118,7 +152,7 @@ class LMaFit(CFAlg):
             return U_out;
     
     @staticmethod
-    def LRF_learnV (S_sparse,U,U_prev,V,V_prev,lamb):
+    def CGF_learnV (S_sparse,U,U_prev,V,V_prev,lamb):
         # fix the variable S and U and solve V
         r = U.shape[1];
         I = np.matrix(np.ones((r,r)));
@@ -127,7 +161,7 @@ class LMaFit(CFAlg):
         return V_out;
     
     @staticmethod
-    def LRF_learnS (S_sparse,U,V,feedback_data):
+    def CGF_learnS (S_sparse,U,V,feedback_data):
         # learning S with projection 
         val = feedback_data.data_val;
         idx = zip(S_sparse.row.tolist(),S_sparse.col.tolist());
@@ -158,20 +192,20 @@ class LMaFit(CFAlg):
             # print counter
             counter += 1;
             print "Iteration: ", counter;
-            U = LMaFit.LRF_learnU(S_sparse,U,U_prev,V,V_prev,lamb);    
+            U = TriUHV.CGF_learnU(S_sparse,U,U_prev,V,V_prev,lamb);    
             print "update U"
             temp = (U_prev*V_prev + S_sparse) - U*V_prev;
             obj = scipy.linalg.norm(temp)**2;
             print "objective: ", obj;
             
             print "Update V"
-            V = LMaFit.LRF_learnV(S_sparse,U,U_prev,V,V_prev,lamb); 
+            V = TriUHV.CGF_learnV(S_sparse,U,U_prev,V,V_prev,lamb); 
             temp = (U_prev*V_prev + S_sparse) - U*V;
             obj = scipy.linalg.norm(temp)**2;
             print "objective: ", obj;
             
             print "Update S"
-            S_sparse = LMaFit.LRF_learnS(S_sparse,U,V,X);
+            S_sparse = TriUHV.CGF_learnS(S_sparse,U,V,X);
     
             # calculate the objective function 
             obj = scipy.linalg.norm(np.matrix(S_sparse.data),2)**2;
