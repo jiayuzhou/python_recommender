@@ -20,6 +20,8 @@ and the RD data has the format of:
  
 Procedure
 --------------
+The logic procedure of the code is as follows:
+
 -- Build Program ID to Program Name mapping from RD data. 
 -- Load the user watch time data into a *user* by *program* sparse matrix, where the value in each cell means the watch time of a user on a specific program. 
 -- Normalize the matrix in a row-wise fashion, such that the sum of the normalized watch time for each user is one. After the normalization each row indicates the a user's preference. 
