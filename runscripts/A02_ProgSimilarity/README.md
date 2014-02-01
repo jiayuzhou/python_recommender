@@ -11,11 +11,11 @@ Data
 --------------
 The program requires **daily watch time (DWT) data** and **ROVI daily (RD) data** for one day, where the DWT data has the format of:
 
-> DUID \t Program ID \t Watchtime \t Genre 
+> [0]DUID \t [1]Program ID \t [2]Watchtime \t [3]Genre 
 
 and the RD data has the format of:
 
-> anything \t anything \t anything \t Program ID \t anything \t anything \t anything \t Program Name \t anything
+> [0]anything \t [1]anything \t [2]anything \t [3]Program ID \t [4]anything \t [5]anything \t [6]anything \t [7]Program Name \t anything
  
  
 Procedure
@@ -24,13 +24,9 @@ The logic procedure of the code is as follows:
 
 * Build Program ID to Program Name mapping from RD data. 
 * Load the user watch time data into a *user* by *program* sparse matrix, where the value in each cell means the watch time of a user on a specific program. 
-* 
-
-
--- 
--- Normalize the matrix in a row-wise fashion, such that the sum of the normalized watch time for each user is one. After the normalization each row indicates the a user's preference. 
--- Compute the pairwise similarity of each program using *1 - cosine distance*. 
--- For each program, we rank all other programs according to their similarity (in the descending order), and output top *k* similar programs, where *k* is given in the input.   
+* Normalize the matrix in a row-wise fashion, such that the sum of the normalized watch time for each user is one. After the normalization each row indicates the a user's preference. 
+* Compute the pairwise similarity of each program using *1 - cosine distance*. 
+* For each program, we rank all other programs according to their similarity (in the descending order), and output top *k* similar programs, where *k* is given in the input.   
 
 How to Run
 --------------
