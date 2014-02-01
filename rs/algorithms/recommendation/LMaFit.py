@@ -159,18 +159,18 @@ class LMaFit(CFAlg):
             counter += 1;
             print "Iteration: ", counter;
             U = LMaFit.LRF_learnU(S_sparse,U,U_prev,V,V_prev,lamb);    
-            print "update U"
-            temp = (U_prev*V_prev + S_sparse) - U*V_prev;
-            obj = scipy.linalg.norm(temp)**2;
-            print "objective: ", obj;
+            #print "update U"
+            #temp = (U_prev*V_prev + S_sparse) - U*V_prev;
+            #obj = scipy.linalg.norm(temp)**2;
+            #print "objective: ", obj;
             
-            print "Update V"
+            #print "Update V"
             V = LMaFit.LRF_learnV(S_sparse,U,U_prev,V,V_prev,lamb); 
-            temp = (U_prev*V_prev + S_sparse) - U*V;
-            obj = scipy.linalg.norm(temp)**2;
-            print "objective: ", obj;
+            #temp = (U_prev*V_prev + S_sparse) - U*V;
+            #obj = scipy.linalg.norm(temp)**2;
+            #print "objective: ", obj;
             
-            print "Update S"
+            #print "Update S"
             S_sparse = LMaFit.LRF_learnS(S_sparse,U,V,X);
     
             # calculate the objective function 

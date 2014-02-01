@@ -19,11 +19,11 @@ if __name__ == '__main__':
     # build model with 3 latent factors.
     r = 10;
     # the L_2 norm regularizer 
-    lamb = 0.001; 
+    lamb = 0.1; 
     # the stopping delta value 
     delta = 1e-5;
     # the maximium iteration number
-    maxiter = 1000;
+    maxiter = 100;
      
     LMaFit_model = LMaFit(r,lamb,delta,maxiter, verbose = True);
     LMaFit_model.train(feedback_data);
