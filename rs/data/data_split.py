@@ -69,13 +69,13 @@ def fold(data_size, fold_num, total_fold):
     
     Parameters
     ----------
-    data_size:  number of 
+    data_size:  number of samples. 
     fold_num:   the 0-based fold index [0..total_fold-1] 
-    total_fold: 
+    total_fold: the total number the (n) of n-fold.
     
     Returns
     ----------
-    out. the selected 
+    out. the selected index in this fold. 
     '''
     
     if fold_num >= total_fold:

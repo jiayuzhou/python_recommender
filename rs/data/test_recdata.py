@@ -18,7 +18,7 @@ if __name__ == '__main__':
     
     
     print '-----------------'
-    print 'subsample 3 rows'
+    print '>>>subsample 3 rows'
     
     [subdata, subidx] = dataStruct.subsample_row(3);
     print subidx;
@@ -29,7 +29,7 @@ if __name__ == '__main__':
     
     
     print '-----------------'
-    print 'subsample 50% rows'
+    print '>>>subsample 50% rows'
     
     [data_split, data_split_comp, selidx_split, selidx_split_comp] = dataStruct.split(0.5);
     
@@ -41,5 +41,26 @@ if __name__ == '__main__':
     print selidx_split_comp;
     print data_split_comp.get_sparse_matrix().todense();
     print data_split_comp.row_mapping;
+    
+    print '-----------------'
+    print '>>>3 - fold. '
+    
+    print '---fold 1---'
+    [fold_data, fold_idx] = dataStruct.fold(0, 3);
+    print fold_idx;
+    print fold_data.get_sparse_matrix().todense();
+    print fold_data.row_mapping;
+    
+    print '---fold 2---'
+    [fold_data, fold_idx] = dataStruct.fold(1, 3);
+    print fold_idx;
+    print fold_data.get_sparse_matrix().todense();
+    print fold_data.row_mapping;
+    
+    print '---fold 3---'
+    [fold_data, fold_idx] = dataStruct.fold(2, 3);
+    print fold_idx;
+    print fold_data.get_sparse_matrix().todense();
+    print fold_data.row_mapping;
     
     

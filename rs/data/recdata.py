@@ -28,15 +28,15 @@ class FeedbackData(GenericData):
         
         # the following things form a tuple (data_row[i], data_col[i], data_val[i]).
         # later on a data_row can construct a coo sparse matrix.  
-        self.data_row = data_row; 
-        self.data_col = data_col;
-        self.data_val = data_val;
+        self.data_row = data_row[:]; 
+        self.data_col = data_col[:];
+        self.data_val = data_val[:];
         self.num_row  = num_row;
         self.num_col  = num_col;
         
-        self.row_mapping  = row_mapping;
-        self.col_mapping = col_mapping;
-        self.meta = meta_data;
+        self.row_mapping = row_mapping.copy();
+        self.col_mapping = col_mapping.copy();
+        self.meta        = meta_data.copy();
     
     def __str__(self):
         return 'Row#:' + str(self.num_row) + ' Col#:' + str(self.num_col) + ' Element:'+ str(len(self.data_val));
@@ -167,16 +167,20 @@ class FeedbackData(GenericData):
         
         Parameters
         ----------
-        fold_num:
-        total_fold:
+        fold_num:    the 0-based fold index [0..total_fold-1] 
+        total_fold:  the total number the (n) of n-fold. 
         
         Returns
         ----------
-        out: [fold_data, selidx]
-        fold_data: 
-        selidx
+        out: [fold_data, sel_idx]
+        fold_data: Feedback data structure. 
+        sel_idx: fold index
         '''
-        pass;
+        
+        sel_idx = ds.fold(self.num_row, fold_num, total_fold);
+        fold_data = self.subdata(sel_idx);
+        
+        return [fold_data, sel_idx];
     
     
     
