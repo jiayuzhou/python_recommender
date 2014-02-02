@@ -27,7 +27,11 @@ class URM(object):
     '''
     
     RTYPE_DATA   = 'rt_data';
+    
     RTYPE_RESULT = 'rt_result';
+    
+    # save experimental settings (splittings, data finger-prints).  
+    RTYPE_EXPCFG = 'rt_exp_config';
 
     _instance = None;
 
