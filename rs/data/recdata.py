@@ -8,6 +8,7 @@ from rs.data.generic_data import GenericData;
 from rs.utils.sparse_matrix import normalize_row;
 from scipy.sparse import coo_matrix;
 import random
+import rs.data.data_split as ds;
 
 class FeedbackData(GenericData):
     '''
@@ -115,23 +116,21 @@ class FeedbackData(GenericData):
         
         Parameters
         ----------
+        sel_row_num: the number of selected rows. 
         
         Returns
         ----------
         out: a list of two components [sample_data, selidx]
         sample_data: 
-        selidx
+        sel_idx:
         '''
-        if sel_row_num > self.num_row:
-            sel_row_num = self.num_row;
         
-        # generate random sample index
-        idx = range(len(self.row_mapping));  
-        random.shuffle(idx);                 # random permutation.
-        selidx = idx[:sel_row_num];          # take random rows.
+        # sampling a set of rows 
+        sel_idx = ds.sample_num(self.num_row, sel_row_num);
         
-        sample_data = self.subdata(selidx);
-        return [sample_data, selidx];
+        # construct data set using the selected rows 
+        sample_data = self.subdata(sel_idx);
+        return [sample_data, sel_idx];
         
     def split(self, percentage):
         '''
@@ -153,17 +152,11 @@ class FeedbackData(GenericData):
         selidx_split_comp: the index of rows in data_split_comp. 
         '''
         
-        if percentage >= 1 or percentage <=0:
-            raise ValueError('percentage should be in the open range of (0, 1).')
+        # obtain the indices of the split / complement of the split.  
+        [selidx_split, selidx_split_comp] = ds.split(self.num_row, percentage);
         
-        sel_row_num = int(round(self.num_row * percentage));
-        sel_row_num = max(min(sel_row_num, self.num_row), 1); # range protection [1, self.num_row]
-
-        # obtain a random part of sub data set of number sel_row_num.
-        [data_split, selidx_split] = self.subsample_row(sel_row_num);
-        
-        # get the compliment of the split. 
-        selidx_split_comp  = list(set(range(self.num_row)) - set(selidx_split));
+        # acquire data from the splits. 
+        data_split      = self.subdata(selidx_split);
         data_split_comp = self.subdata(selidx_split_comp);
         
         return [data_split, data_split_comp, selidx_split, selidx_split_comp];
