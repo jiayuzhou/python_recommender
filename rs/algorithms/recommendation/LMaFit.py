@@ -37,6 +37,10 @@ class LMaFit(CFAlg):
         
         self.verbose = verbose;
         
+    def unique_str(self):
+        return LMaFit.ALG_NAME + '_k' + str(self.latent_factor) + '_lam' + str(self.lamb) + \
+            '_maxIter' + str(self.maxiter) + '_stopCri' + self.delta; 
+        
     def train(self, feedback_data):
         '''
         Train the model with specified feedback_data. 

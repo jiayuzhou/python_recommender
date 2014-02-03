@@ -78,4 +78,8 @@ class RandUV(CFAlg):
             log('predicted ' + str(len(row_idx_arr)) + ' elements.');
         
         return result;
+    
+    def unique_str(self):
+        return RandUV.ALG_NAME + '_k_' + self.latent_factor + '_' + self.row + '_' + self.col;
+    
         

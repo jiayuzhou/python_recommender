@@ -4,7 +4,9 @@ Created on Jan 29, 2014
 @author: jiayu.zhou
 '''
 
-class CFAlg(object):
+from rs.algorithms.Alg import Alg;
+
+class CFAlg(Alg):
     '''
     Generic collaborative filtering algorithm. The algorithms in the interface 
     should have a train method that takes an input of the type:
@@ -44,3 +46,9 @@ class CFAlg(object):
         '''
         
         raise NotImplementedError("Interface method.");
+    
+    def unique_str(self):
+        '''
+        The unique string should include the algorithm name and parameter values. 
+        '''
+        pass;

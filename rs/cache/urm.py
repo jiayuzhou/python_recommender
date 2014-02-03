@@ -60,53 +60,67 @@ class URM(object):
         if not os.path.exists(self.cacheLocation):
             os.makedirs(self.cacheLocation);
     
-    def universal_resrouce_location(self, resource_type, unique_resource_str):
+    def universal_resrouce_location(self, resource_type, unique_resource_str, sub_folder = None):
         '''
         Get the FULL PATH and NAME of file.
         resource_type_hash($unique_resource_str$);
         '''
+        
         # construct the file name (without path).
         filename = resource_type + '_' + hashlib.sha224(unique_resource_str).hexdigest();
-        res_loc  = self.cache_folder + '/' + resource_type;
-        if not os.path.exists(res_loc):
-            os.makedirs(res_loc);
-        return res_loc + '/' + filename;
+        
+        if not sub_folder:
+            
+            res_loc  = self.cache_folder + '/' + resource_type;
+            if not os.path.exists(res_loc):
+                os.makedirs(res_loc);
+            out = res_loc + '/' + filename;
+        else:
+            res_loc  = self.cache_folder + '/' + resource_type + '/' + sub_folder;
+            if not os.path.exists(res_loc):
+                os.makedirs(res_loc);
+            out = res_loc + '/' + filename;
+        return out;
     
     @classmethod
-    def CheckResource(cls, resource_type, unique_resource_str):
+    def CheckResource(cls, resource_type, unique_resource_str, sub_folder = None):
+        # return false if cache is turned off. 
         if not cls.GetInstance().use_cache:
             return False;
         
-        url = cls.GetInstance().universal_resrouce_location(resource_type, unique_resource_str);
+        # generate full resource address.
+        url = cls.GetInstance().universal_resrouce_location(resource_type, unique_resource_str, sub_folder);
         return os.path.isfile(url);
         
     @classmethod
-    def LoadResource(cls, resource_type, unique_resource_str):
+    def LoadResource(cls, resource_type, unique_resource_str, sub_folder = None):
         '''
         Get cached resource. The method firstly use resource type and unique resource string to 
         construct a file name with full path.  
         '''
         if not cls.GetInstance().use_cache:
-            return;
+            return None;
         
-        url = cls.GetInstance().universal_resrouce_location(resource_type, unique_resource_str);
+        url = cls.GetInstance().universal_resrouce_location(resource_type, unique_resource_str, sub_folder);
+        
         if not os.path.isfile(url):
             Logger.Log("Resource["+ resource_type +"]["+ unique_resource_str +"] not found.");
-            return [];
+            return None;
         else:
             Logger.Log("Loading resource ["+ resource_type +"]["+ unique_resource_str +"] ...");
             return pickle.load(open(url, "rb"));
             Logger.Log("Resource["+ resource_type +"]["+ unique_resource_str +"] loaded.");
         
     @classmethod
-    def SaveResource(cls, resource_type, unique_resource_str, content):
+    def SaveResource(cls, resource_type, unique_resource_str, content, sub_folder = None):
         '''
         Put resource in cache. 
         '''
         if not cls.GetInstance().use_cache:
             return;
         
-        url = cls.GetInstance().universal_resrouce_location(resource_type, unique_resource_str);
+        url = cls.GetInstance().universal_resrouce_location(resource_type, unique_resource_str, sub_folder);
+        
         if not os.path.isfile(url):
             Logger.Log("Saving resource ["+ resource_type +"]["+ unique_resource_str +"]...");
             pickle.dump(content, open(url,"wb"));
