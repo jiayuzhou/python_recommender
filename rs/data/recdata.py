@@ -182,6 +182,57 @@ class FeedbackData(GenericData):
         
         return [fold_data, sel_idx];
     
+def share_row_data(fb_data1, fb_data2):
+    '''
+    Compute the shared data. The [row_mapping]s of the Feedback data 
+    are used.
     
+    This method firstly find the shared rows and then construct two corresponding 
+    Feedback datasets, each of which only includes the shared rows. The rows of 
+    the two datasets are aligned.   
     
+    Parameters
+    ----------
+    fb_data1:
+    fb_data2:
     
+    Returns
+    ----------
+    out: [fb_data1_share, fb_data2_share]
+    fb_data1_share: 
+    fb_data2_share: 
+    '''
+    
+    if (not fb_data1.row_mapping) or (not fb_data2.row_mapping):
+        raise ValueError('Both input Feedback  should ');
+    
+    # obtain the list of shared users. 
+    row_mapping1 = fb_data1.row_mapping;
+    row_mapping2 = fb_data2.row_mapping;
+    shared_user  = []; 
+    if len(row_mapping1) < len(row_mapping2): 
+        # for rows in row_mapping1
+        for row_id in row_mapping1.keys():
+            if row_id in row_mapping2:
+                shared_user.append(row_id);
+    else:
+        # for rows in row_mapping2
+        for row_id in row_mapping2.keys():
+            if row_id in row_mapping1:
+                shared_user.append(row_id);
+    
+    # build selection indices. 
+    sel_idx1 = [];
+    for row_id in shared_user:
+        sel_idx1.append(row_mapping1[row_id]);
+    
+    sel_idx2 = [];
+    for row_id in shared_user:
+        sel_idx2.append(row_mapping2[row_id]);
+    
+    # construct sub-data. 
+    fb_data1_share = fb_data1.subdata(sel_idx1);
+    fb_data2_share = fb_data2.subdata(sel_idx2);
+    return [fb_data1_share, fb_data2_share];
+
+
