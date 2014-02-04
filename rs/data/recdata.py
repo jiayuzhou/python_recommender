@@ -7,7 +7,7 @@ Created on Jan 28, 2014
 from rs.data.generic_data import GenericData;
 from rs.utils.sparse_matrix import normalize_row;
 from scipy.sparse import coo_matrix;
-import random
+import random #@UnusedImport
 import rs.data.data_split as ds;
 
 class FeedbackData(GenericData):
@@ -81,7 +81,7 @@ class FeedbackData(GenericData):
              in the original set. 
         '''
         # check if the indices are good. 
-        if max(selidx) >= self.num_col or min(selidx) < 0:
+        if max(selidx) >= self.num_row or min(selidx) < 0:
             raise ValueError('Found invalid element in the index set!');
         
         # construct sparse matrix using coo.

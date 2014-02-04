@@ -26,6 +26,7 @@ class Logger(object):
     MSG_CATEGORY_DATA    = 'DATA';
     MSG_CATEGORY_EXP     = 'EXPERIMENT';
     MSG_CATEGORY_DEFAULT = 'DEFAULT';
+    MSG_CATEGORY_CACHE   = 'CACHE';
     
     _instance = None;
     

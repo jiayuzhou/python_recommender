@@ -39,7 +39,7 @@ class LMaFit(CFAlg):
         
     def unique_str(self):
         return LMaFit.ALG_NAME + '_k' + str(self.latent_factor) + '_lam' + str(self.lamb) + \
-            '_maxIter' + str(self.maxiter) + '_stopCri' + self.delta; 
+            '_maxIter' + str(self.maxiter) + '_stopCri' + str(self.delta); 
         
     def train(self, feedback_data):
         '''

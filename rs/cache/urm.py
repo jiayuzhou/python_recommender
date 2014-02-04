@@ -26,6 +26,14 @@ class URM(object):
              there is no collision. 
     '''
     
+    @staticmethod
+    def log(msg):
+        '''
+        logging style. 
+        '''
+        Logger.Log(msg, Logger.MSG_CATEGORY_CACHE);
+        
+    
     RTYPE_DATA   = 'rt_data';
     
     RTYPE_RESULT = 'rt_result';
@@ -104,12 +112,12 @@ class URM(object):
         url = cls.GetInstance().universal_resrouce_location(resource_type, unique_resource_str, sub_folder);
         
         if not os.path.isfile(url):
-            Logger.Log("Resource["+ resource_type +"]["+ unique_resource_str +"] not found.");
+            cls.log("Resource["+ resource_type +"]["+ unique_resource_str +"] not found.");
             return None;
         else:
-            Logger.Log("Loading resource ["+ resource_type +"]["+ unique_resource_str +"] ...");
+            cls.log("Loading resource ["+ resource_type +"]["+ unique_resource_str +"] ...");
             return pickle.load(open(url, "rb"));
-            Logger.Log("Resource["+ resource_type +"]["+ unique_resource_str +"] loaded.");
+            cls.log("Resource["+ resource_type +"]["+ unique_resource_str +"] loaded.");
         
     @classmethod
     def SaveResource(cls, resource_type, unique_resource_str, content, sub_folder = None):
@@ -122,11 +130,11 @@ class URM(object):
         url = cls.GetInstance().universal_resrouce_location(resource_type, unique_resource_str, sub_folder);
         
         if not os.path.isfile(url):
-            Logger.Log("Saving resource ["+ resource_type +"]["+ unique_resource_str +"]...");
+            cls.log("Saving resource ["+ resource_type +"]["+ unique_resource_str +"]...");
             pickle.dump(content, open(url,"wb"));
-            Logger.Log("Resource["+ resource_type +"]["+ unique_resource_str +"] saved.");
+            cls.log("Resource["+ resource_type +"]["+ unique_resource_str +"] saved.");
         else:
-            Logger.Log("Resource["+ resource_type +"]["+ unique_resource_str +"] found. Save skipped.");
+            cls.log("Resource["+ resource_type +"]["+ unique_resource_str +"] found. Save skipped.");
     
     @classmethod
     def GetInstance(cls):

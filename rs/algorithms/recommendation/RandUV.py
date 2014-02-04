@@ -16,7 +16,7 @@ class RandUV(CFAlg):
     '''
     ALG_NAME = 'RANDOM ALGO';
 
-    def __init__(self, latent_factor, verbose = False):
+    def __init__(self, latent_factor = 5, verbose = False):
         '''
         Constructor
         '''
@@ -25,7 +25,10 @@ class RandUV(CFAlg):
         log('dummy algorithm instance created: latent factor ' + str(self.latent_factor));
         
         self.verbose = verbose;
-        
+            
+    def unique_str(self):
+        return RandUV.ALG_NAME + '_k_' + str(self.latent_factor);
+    
     def train(self, feedback_data):
         '''
         Train the model with specified feedback_data. 
@@ -79,7 +82,6 @@ class RandUV(CFAlg):
         
         return result;
     
-    def unique_str(self):
-        return RandUV.ALG_NAME + '_k_' + self.latent_factor + '_' + self.row + '_' + self.col;
+    
     
         
