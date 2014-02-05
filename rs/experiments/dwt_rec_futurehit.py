@@ -14,7 +14,7 @@ from rs.cache.urm import URM; # load resource manager.
 from rs.data.daily_watchtime import DailyWatchTimeReader;
 from rs.utils.log import Logger;
 from rs.experiments.evaluation import hit_prec;
-import numpy as np;
+#import numpy as np; 
 
 def experiment_future_program(exp_name, previous_data_files, future_data_file, \
                               min_occ_user, min_occ_prog, method_list, top_k):
@@ -101,14 +101,20 @@ def experiment_unit_future_program(exp_id, method, tr_data, te_data, top_k):
         prog_score = method.get_score(duid, prog_list, te_data.meta);  # get scores of the programs in the list. 
         
         # sort the score (first dimension is the index and the second is the actual prediction value).
+        #    NOTE: the first dimension is the order with respect to prog_list
         srt_list = [(k[0], k[1]) for k in sorted(enumerate(prog_score), key=lambda x:x[1], reverse=True)];
         
         srt_list = srt_list[:top_k]; # truncate to top k. 
         
         [srt_idx, _]  = zip(*srt_list);
         
+        # map from prog_list to actual index. 
+        mapped_srt_idx = [te_data.col_mapping[prog_list[idx]] for idx in srt_idx];
+        
+        #print te_datamat[te_data.row_mapping[duid], mapped_srt_idx].todense();
+        
         # get the ground truth hit.
-        prog_hit = (te_datamat[te_data.row_mapping[duid], srt_idx].todense().tolist())[0];
+        prog_hit = (te_datamat[te_data.row_mapping[duid], mapped_srt_idx].todense().tolist())[0];
         
         # compute hit precision (now we consider only binary hit).  
         eval_result.append(hit_prec(prog_hit));

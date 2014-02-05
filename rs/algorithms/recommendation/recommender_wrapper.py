@@ -6,6 +6,7 @@ Created on Feb 4, 2014
 @author: jiayu.zhou
 '''
 
+import numpy as np;
 
 class Recommender(object):
     '''
@@ -33,4 +34,42 @@ class Recommender(object):
         '''
         raise NotImplementedError("Interface method.");
 
+
+class Rec_Dummy(Recommender):
+    '''
+    An example of recommender.
     
+    This is a dummy recommender which returns whatever seen in the data set or return 0. 
+    '''
+    
+    def __init__(self):
+        '''
+        really nothing to do. 
+        '''
+        pass;
+    
+    def train(self, feedback_data):
+        '''
+        record the Feedback data set. 
+        '''
+        self.data         = feedback_data.get_sparse_matrix().tolil();
+        self.user_mapping = feedback_data.row_mapping;
+        self.item_mapping = feedback_data.col_mapping;
+        
+    def get_score(self, user_id, item_id_list, meta_data = None):
+        '''
+        user_id: string.
+        '''
+        if not user_id in self.user_mapping:
+            print 'Cold start user: ' + user_id;
+            return np.zeros(len(item_id_list)).tolist();
+        
+        score = [self.data[self.user_mapping[user_id], self.item_mapping[item_id]] \
+                        if item_id in self.item_mapping else 0 for item_id in item_id_list ];
+        
+        return score;
+        
+    def unique_str(self):
+        return 'Rec_Dummy';
+        
+        

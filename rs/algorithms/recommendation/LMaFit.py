@@ -39,7 +39,7 @@ class Rec_LMaFit(Recommender):
             sb = Rec_LMaFit.ALG_NAME;
             # append all models in side classifier.
             for model in self.models:
-                sb += str(hash(model.unique_str()));
+                sb += '_' + str(hash(model.unique_str()));
             self._str = sb;
         return self._str;    
     
@@ -89,7 +89,7 @@ class Rec_LMaFit(Recommender):
 
 class LMaFit(CFAlg):
     '''
-    A random guess recommender (demo).
+    Low-Rank Matrix Factorization algorithm for matrix completion.  
     '''
     ALG_NAME = 'LMaFit';
 
