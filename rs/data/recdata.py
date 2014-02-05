@@ -67,21 +67,21 @@ class FeedbackData(GenericData):
         self.data_row = mat.row.tolist();
         self.data_col = mat.col.tolist();
         
-    def subdata(self, selidx):
+    def subdata_row(self, sel_idx):
         '''
         select a set of rows (users) to form a new dataset.  
         
         Parameters
         ----------
-        selidx: a list of row indices. The row index set can have duplicated entries.  
+        sel_idx: a list of row indices. The row index set can have duplicated entries.  
         
         Returns
         ----------
-        out: a new FeedbackData instance whose rows are given in selidx 
+        out: a new FeedbackData instance whose rows are given in sel_idx 
              in the original set. 
         '''
         # check if the indices are good. 
-        if max(selidx) >= self.num_row or min(selidx) < 0:
+        if max(sel_idx) >= self.num_row or min(sel_idx) < 0:
             raise ValueError('Found invalid element in the index set!');
         
         # construct sparse matrix using coo.
@@ -91,20 +91,51 @@ class FeedbackData(GenericData):
         mat = mat.tocsr();
         
         # sub-sampling data matrix.
-        mat = mat[selidx, :];            # slice the matrix. 
+        mat = mat[sel_idx, :];            # slice the matrix. 
         mat = mat.tocoo();               # convert it back. 
         
         # recompute the row mapping. 
         inv_mapping = {yy : xx for xx, yy in self.row_mapping.iteritems()};
-        row_mapping = { inv_mapping[xx]: ii for ii, xx in enumerate(selidx) };
+        row_mapping = { inv_mapping[xx]: ii for ii, xx in enumerate(sel_idx) };
         
         data_val = mat.data.tolist();
         data_row = mat.row.tolist();
         data_col = mat.col.tolist();
         
-        newdata = FeedbackData(data_row, data_col, data_val, len(selidx), self.num_col,\
+        newdata = FeedbackData(data_row, data_col, data_val, len(sel_idx), self.num_col,\
                   row_mapping, self.col_mapping, self.meta); # generate new data 
                   
+        return newdata;
+    
+    def subdata_col(self, sel_idx):
+        '''
+        Select a set of columns (programs) to form a new dataset.
+        '''
+        # check if the indices are good. 
+        if max(sel_idx) >= self.num_col or min(sel_idx) < 0:
+            raise ValueError('Found invalid element in the index set!');
+        
+        # construct sparse matrix using coo.
+        mat = self.get_sparse_matrix();
+        
+        # convert to csc for fast column slicing. 
+        mat = mat.tocsc();
+        
+        # sub-sampling data.
+        mat = mat[:, sel_idx];  # slice the matrix.
+        mat = mat.tocoo();      # convert it back. 
+        
+        # recompute the row mapping.
+        inv_mapping = {yy: xx for xx, yy in self.col_mapping.iteritems()};
+        col_mapping = {inv_mapping[xx]: ii for ii, xx in enumerate(sel_idx)}; 
+        
+        data_val = mat.data.tolist();
+        data_row = mat.row.tolist();
+        data_col = mat.col.tolist();
+        
+        newdata = FeedbackData(data_row, data_col, data_val, self.num_row, len(sel_idx), \
+                        self.row_mapping, col_mapping, self.meta); # generate new data.
+        
         return newdata;
         
     def subsample_row(self, sel_row_num):
@@ -129,13 +160,13 @@ class FeedbackData(GenericData):
         sel_idx = ds.sample_num(self.num_row, sel_row_num);
         
         # construct data set using the selected rows 
-        sample_data = self.subdata(sel_idx);
+        sample_data = self.subdata_row(sel_idx);
         return [sample_data, sel_idx];
         
     def split(self, percentage):
         '''
         get a random splitting of data with a specified proportion of rows. 
-        NOTE: it is recommended to use subdata method in get deterministic splits. 
+        NOTE: it is recommended to use subdata_row method in get deterministic splits. 
         
         Parameters
         ----------
@@ -156,8 +187,8 @@ class FeedbackData(GenericData):
         [selidx_split, selidx_split_comp] = ds.split(self.num_row, percentage);
         
         # acquire data from the splits. 
-        data_split      = self.subdata(selidx_split);
-        data_split_comp = self.subdata(selidx_split_comp);
+        data_split      = self.subdata_row(selidx_split);
+        data_split_comp = self.subdata_row(selidx_split_comp);
         
         return [data_split, data_split_comp, selidx_split, selidx_split_comp];
     
@@ -178,10 +209,68 @@ class FeedbackData(GenericData):
         '''
         
         sel_idx = ds.fold(self.num_row, fold_num, total_fold);
-        fold_data = self.subdata(sel_idx);
+        fold_data = self.subdata_row(sel_idx);
         
         return [fold_data, sel_idx];
+
+
+
+
+
+
+
+
+def share_row_data(fb_data1, fb_data2):
+    '''
+    Compute the shared data. The [row_mapping]s of the Feedback data 
+    are used.
     
+    This method firstly find the shared rows and then construct two corresponding 
+    Feedback datasets, each of which only includes the shared rows. The rows of 
+    the two datasets are aligned.   
     
+    Parameters
+    ----------
+    fb_data1:
+    fb_data2:
     
+    Returns
+    ----------
+    out: [fb_data1_share, fb_data2_share]
+    fb_data1_share: 
+    fb_data2_share: 
+    '''
     
+    if (not fb_data1.row_mapping) or (not fb_data2.row_mapping):
+        raise ValueError('Both input Feedback  should ');
+    
+    # obtain the list of shared users. 
+    row_mapping1 = fb_data1.row_mapping;
+    row_mapping2 = fb_data2.row_mapping;
+    shared_user  = []; 
+    if len(row_mapping1) < len(row_mapping2): 
+        # for rows in row_mapping1
+        for row_id in row_mapping1.keys():
+            if row_id in row_mapping2:
+                shared_user.append(row_id);
+    else:
+        # for rows in row_mapping2
+        for row_id in row_mapping2.keys():
+            if row_id in row_mapping1:
+                shared_user.append(row_id);
+    
+    # build selection indices. 
+    sel_idx1 = [];
+    for row_id in shared_user:
+        sel_idx1.append(row_mapping1[row_id]);
+    
+    sel_idx2 = [];
+    for row_id in shared_user:
+        sel_idx2.append(row_mapping2[row_id]);
+    
+    # construct sub-data. 
+    fb_data1_share = fb_data1.subdata_row(sel_idx1);
+    fb_data2_share = fb_data2.subdata_row(sel_idx2);
+    return [fb_data1_share, fb_data2_share];
+
+

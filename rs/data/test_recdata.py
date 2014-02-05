@@ -20,12 +20,12 @@ if __name__ == '__main__':
     print '-----------------'
     print '>>>subsample 3 rows'
     
-    [subdata, subidx] = dataStruct.subsample_row(3);
+    [subdata_row, subidx] = dataStruct.subsample_row(3);
     print subidx;
     
-    print subdata.get_sparse_matrix().todense();
+    print subdata_row.get_sparse_matrix().todense();
     
-    print subdata.row_mapping;
+    print subdata_row.row_mapping;
     
     
     print '-----------------'
@@ -62,5 +62,18 @@ if __name__ == '__main__':
     print fold_idx;
     print fold_data.get_sparse_matrix().todense();
     print fold_data.row_mapping;
+    
+    
+    print '>>>>>>>>>>>>>>>>>>>>>>>>>>>'
+    print dataStruct.col_mapping;
+    print dataStruct.get_sparse_matrix().todense();
+    
+    print 'select [0, 2, 4] columns';
+    sel_idx = [0, 2, 4]; 
+    subdata = dataStruct.subdata_col(sel_idx);
+    print subdata.get_sparse_matrix().todense();
+    print subdata.col_mapping;
+    
+    
     
     

@@ -1,4 +1,4 @@
-# This the daily log entity for a ROVI daily log file. 
+# This the daily mcpl_log entity for a ROVI daily mcpl_log file. 
 # Created: Jiayu Zhou, Jan 20, 2014. 
 
 import csv;
@@ -41,7 +41,7 @@ class DailyLog:
         return len(self.content);
 
     def mergeLog(self, anotherLog):
-        # get a merged log.
+        # get a merged mcpl_log.
         mergedLog = DailyLog();
         mergedLog.content  = self.content + anotherLog.content;
         #mergedLog.progDic  = dict(self.progDic.items() + anotherLog.progDic.items());
@@ -53,9 +53,9 @@ class DailyLog:
     @staticmethod 
     def mergeLogs(setOfLogs):
         mergeLog = DailyLog();
-        mergeLog.content  = [cont for log in setOfLogs for cont in log.content];
-        mergeLog.progDic  = combineSetDictList([log.progDic  for log in setOfLogs]);
-        mergeLog.genreDic = combineSetDictList([log.genreDic for log in setOfLogs]);
+        mergeLog.content  = [cont for mcpl_log in setOfLogs for cont in mcpl_log.content];
+        mergeLog.progDic  = combineSetDictList([mcpl_log.progDic  for mcpl_log in setOfLogs]);
+        mergeLog.genreDic = combineSetDictList([mcpl_log.genreDic for mcpl_log in setOfLogs]);
         return mergeLog;
 
     def overlap(self, anotherLog):

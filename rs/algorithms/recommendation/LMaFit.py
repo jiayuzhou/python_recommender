@@ -2,24 +2,97 @@
 Created on Jan 29, 2014
 
 @author: Shiyu C. (s.chang1@partner.samsung.com)
+
+Modified on Feb 5, 2014
+by Jiayu Zhou, added Rec_LMaFit.  
 '''
 
 import numpy as np;
 from rs.algorithms.recommendation.generic_recalg import CFAlg;
+from rs.algorithms.recommendation.recommender_wrapper import Recommender;
 from rs.utils.log import Logger; 
 import scipy.sparse
 import scipy.linalg
 
 
-# an encapsulated logger.  
-log = lambda message: Logger.Log(LMaFit.ALG_NAME + ':'+message, Logger.MSG_CATEGORY_ALGO);
+# encapsulated loggers.  
+mcpl_log = lambda message: Logger.Log(LMaFit.ALG_NAME + ':'+message, Logger.MSG_CATEGORY_ALGO);
+rec_log = lambda message: Logger.Log(Rec_LMaFit.ALG_NAME + ':'+message, Logger.MSG_CATEGORY_ALGO);
 
+class Rec_LMaFit(Recommender):
+    '''
+    An implementation recommender wrapper using the LMaFit algorithm (with the capability of ensemble). 
+    '''
+    
+    ALG_NAME = 'Rec_LMaFit';
 
+    def __init__(self, latent_factors = [1, 2], lamb = [1e-3, 1e-1], stop_delta = 1e-4, maxiter = 1e3, verbose = False):
+        '''
+        Constructor.
+        '''
+        self.models = [];
+        for model_idx in range(len(latent_factors)):
+            # constructs a set of models to ensemble
+            self.models.append(LMaFit(latent_factors[model_idx], lamb[model_idx], stop_delta, maxiter, verbose));
+        
+        rec_log('LMaFit recommender instance created with ' + str(len(self.models)) + ' LMaFit models.');
+        
+    def unique_str(self):
+        if not hasattr(self, '_str'):
+            sb = Rec_LMaFit.ALG_NAME;
+            # append all models in side classifier.
+            for model in self.models:
+                sb += '_' + str(hash(model.unique_str()));
+            self._str = sb;
+        return self._str;    
+    
+    def train(self, feedback_data):
+        '''
+        Train current recommendation system. 
+        '''
+        # record the mapping information.
+        self.user_mapping = feedback_data.row_mapping;
+        self.item_mapping = feedback_data.col_mapping;
+        
+        for model in self.models:
+            model.train(feedback_data);
+    
+    def get_score(self, user_id, item_id_list, meta_data = None):
+        '''
+        return a score prediction from the models behind. 
+        '''
+        
+        # cold-start user: random recommendation. 
+        # TODO: recommend a set of popular items from different representative latent groups. 
+        if not user_id in self.user_mapping:
+            rec_log('Cold start user: ' + user_id);
+            return np.random.rand(len(item_id_list)).tolist();
+          
+        
+        # regular user: use learned preference to proceed recommendation.  
+        score = np.zeros(len(item_id_list));
+        
+        # the index of the items in item_id_list, that currently exist in the training data.
+        item_exist = [x for (x,y) in enumerate(item_id_list) if y in self.item_mapping];
+        
+        # the column index of the items in the item_exist;
+        item_col_idx = [self.item_mapping[item_id] for item_id in item_id_list if item_id in self.item_mapping];
+        item_row_idx = [self.user_mapping[user_id] for x in item_col_idx];
 
+        # generate results.  
+        for model in self.models:
+            score[item_exist] += np.array(model.predict(item_row_idx, item_col_idx));
+        score = score / len(self.models); # average over different models. 
+        
+        # TODO: for methods that can handle COLD-START ITEMS, the procedure of handling cold-start 
+        #       should be put in this place.
+        
+        return score.tolist();
+        
 
 class LMaFit(CFAlg):
     '''
-    A random guess recommender (demo).
+    Low-Rank Matrix Factorization algorithm for matrix completion.  
     '''
     ALG_NAME = 'LMaFit';
 
@@ -33,7 +106,7 @@ class LMaFit(CFAlg):
         self.delta = stop_delta; 
         self.maxiter = maxiter;
         
-        log('dummy algorithm instance created: latent factor ' + str(self.latent_factor));
+        mcpl_log('LMaFit matrix completion instance created: latent factor ' + str(self.latent_factor));
         
         self.verbose = verbose;
         
@@ -55,7 +128,7 @@ class LMaFit(CFAlg):
         no return.
         '''    
         if self.verbose:
-            log('training dummy algorithm.');
+            mcpl_log('training dummy algorithm.');
         
         m = feedback_data.num_row;
         n = feedback_data.num_col;  
@@ -86,7 +159,7 @@ class LMaFit(CFAlg):
         self.S_sparse = S_sparse;
         
         if self.verbose:
-            log('dummy algorithm trained.');
+            mcpl_log('dummy algorithm trained.');
     
     def predict(self, row_idx_arr, col_idx_arr):
         '''
@@ -108,7 +181,7 @@ class LMaFit(CFAlg):
         
         result =  [ (self.U[row, :] * self.V[:, col])[0,0].tolist() for (row, col) in zip(row_idx_arr, col_idx_arr) ];
         if self.verbose:
-            log('predicted ' + str(len(row_idx_arr)) + ' elements.');
+            mcpl_log('predicted ' + str(len(row_idx_arr)) + ' elements.');
         
         return result;
     
@@ -116,7 +189,7 @@ class LMaFit(CFAlg):
     def LRF_learnU (S_sparse,U,U_prev,V,V_prev,lamb):
             # fix the variable S and V solve U
             r = U.shape[1];
-            I = np.matrix(np.ones((r,r)));
+            I = np.matrix(np.eye(r));
             Inv = np.linalg.inv(V*V.T + lamb*I);
             U_out = (U_prev*(V_prev*V.T))*Inv + S_sparse*(V.T*Inv);
             return U_out;
@@ -125,7 +198,7 @@ class LMaFit(CFAlg):
     def LRF_learnV (S_sparse,U,U_prev,V,V_prev,lamb):
         # fix the variable S and U and solve V
         r = U.shape[1];
-        I = np.matrix(np.ones((r,r)));
+        I = np.matrix(np.eye(r));
         Inv = np.linalg.inv(U.T*U + lamb*I);
         V_out = Inv*(U.T*U_prev)*V_prev + Inv*(U.T*S_sparse);
         return V_out;
