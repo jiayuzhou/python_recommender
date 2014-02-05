@@ -1,4 +1,6 @@
 '''
+Test the functionality of the share_row_data function in the rs.data.recdata
+
 Created on Feb 4, 2014
 
 @author: jiayu.zhou

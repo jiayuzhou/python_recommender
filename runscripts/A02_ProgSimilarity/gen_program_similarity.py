@@ -21,7 +21,7 @@ from rs.data.daily_watchtime import DailyWatchTimeReader
 from rs.utils.sparse_matrix import normalize_row;
 from scipy.spatial.distance import cosine;
 
-log = lambda message: Logger.Log('PROG SIMILARITY: '+message, Logger.MSG_CATEGORY_EXP);
+mcpl_log = lambda message: Logger.Log('PROG SIMILARITY: '+message, Logger.MSG_CATEGORY_EXP);
 
 if __name__ == '__main__':
     
@@ -51,11 +51,11 @@ if __name__ == '__main__':
     # turn off screen display.
     Logger.GetInstance().display_level = 10;  
     
-    log('Data file: ' + filename);
-    log('ROVI daily file: ' + rovi_daily_file);    
+    mcpl_log('Data file: ' + filename);
+    mcpl_log('ROVI daily file: ' + rovi_daily_file);    
     
     # build ROVI daily mapping    
-    log('Building ROVI daily mapping');
+    mcpl_log('Building ROVI daily mapping');
     rovi_mapping = {};
     with open(rovi_daily_file) as csvfile:
         rovi_reader = csv.reader(csvfile, delimiter = '\t', quotechar = '|')
@@ -85,10 +85,10 @@ if __name__ == '__main__':
     similarity_file = filename + '.prgsim';
     if not os.path.isfile(similarity_file):
         # normalize data per user. 
-        log('normalizing data...')
+        mcpl_log('normalizing data...')
         mat = normalize_row(mat);
     
-        log('computing pairwise similarity...');
+        mcpl_log('computing pairwise similarity...');
         total_pair = program_num *  (program_num + 1) / 2;
         progress = 0;
         
@@ -98,16 +98,16 @@ if __name__ == '__main__':
                 if i < j:
                     progress += 1;
                     if progress % 1000 == 0:
-                        log('Computing '+ str(progress) + ' out of ' + str(total_pair));
+                        mcpl_log('Computing '+ str(progress) + ' out of ' + str(total_pair));
                     
                     # Our similarity is defined as [1 - cosine distance]. 
                     cor_mat[i][j] = 1 - cosine(mat.getcol(i).todense(), mat.getcol(j).todense());
                     cor_mat[j][i] = cor_mat[i][j];
         
-        log('saving the similarity to file...')
+        mcpl_log('saving the similarity to file...')
         pickle.dump(cor_mat, open(similarity_file,"wb"));
     else:
-        log('computed similarity found. loading...')
+        mcpl_log('computed similarity found. loading...')
         cor_mat = pickle.load(open(similarity_file, "rb"));
         
     # output list. 

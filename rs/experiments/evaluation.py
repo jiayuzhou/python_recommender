@@ -17,3 +17,12 @@ def rmse(list1, list2):
         raise ValueError('Dimension not match.');
     
     return (sum( (x - y) ** 2 for x, y in izip(list1, list2))) ** 0.5;
+
+
+def hit_prec(hit_status):
+    '''
+    Evaluate the precision of hit. The input is the hit status (>0 means hit) of 
+    a list of recommended items (items ranked top by the recommendation algorithm). 
+    '''
+    
+    return sum( x > 0 for x in hit_status ) / float(len(hit_status));
