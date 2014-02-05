@@ -7,7 +7,7 @@ Created on Jan 30, 2014
 '''
 
 from rs.data.daily_watchtime import DailyWatchTimeReader
-from rs.algorithms.recommendation.TriUHV import TriUHV
+from rs.algorithms.recommendation.HierLat import HierLat
 
 if __name__ == '__main__':
     filename = "../../../datasample/agg_duid_pid_watchtime_genre/20131209_100000";
@@ -26,13 +26,13 @@ if __name__ == '__main__':
     # the maximium iteration number
     maxiter = 500;
      
-    TriUHV_model = TriUHV(r,lamb,delta,maxiter, verbose = True); 
-    TriUHV_model.train(feedback_data);
+    HierLat_model = HierLat(r,lamb,delta,maxiter, verbose = True); 
+    HierLat_model.train(feedback_data);
 '''    
     # test. 
     loc_row = [200,   4, 105];
     loc_col = [ 10,  22,   4];
     print 'Prediction:'
-    print TriUHV_model.predict(loc_row, loc_col);
+    print HierLat_model.predict(loc_row, loc_col);
 '''    
     

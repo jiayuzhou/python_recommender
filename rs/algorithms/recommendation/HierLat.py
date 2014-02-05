@@ -1,5 +1,5 @@
 '''
-Created on Jan 31, 2014
+Created on Feb 5, 2014
 
 @author: Shiyu C. (s.chang1@partner.samsung.com)
 
@@ -14,16 +14,16 @@ import scipy.linalg
 
 
 # an encapsulated logger.  
-log = lambda message: Logger.Log(TriUHV.ALG_NAME + ':'+message, Logger.MSG_CATEGORY_ALGO);
+log = lambda message: Logger.Log(HierLat.ALG_NAME + ':'+message, Logger.MSG_CATEGORY_ALGO);
 
 
 
 
-class TriUHV(CFAlg):
+class HierLat(CFAlg):
     '''
     A random guess recommender (demo).
     '''
-    ALG_NAME = 'TriUHV';
+    ALG_NAME = 'HierLat';
     
 ##################################################################################################
 
@@ -97,16 +97,23 @@ class TriUHV(CFAlg):
         S_sparse = scipy.sparse.coo_matrix((np.array(feedback_data.data_val,dtype = np.float64),(feedback_data.data_row,feedback_data.data_col)),(m,n));
         # S_sparse = S_sparse.tolil();
         # print S_sparse.row
+        
+#         ###############################
+#         # check the gradient 
+#         S_U = np.matrix(np.random.rand(m, r));
+#         S_H = np.matrix(np.random.rand(r,g));
+#         S_V = scipy.sparse.coo_matrix((V_val,(meta['pggr_gr'],meta['pggr_pg'])),shape = (g,n));
+#         HierLat.check_Vgradient (S_sparse,U,S_U,H,S_H,V,S_V,lamb)         
 
         ###############################
         # the main learning process
-        # U = TriUHV.CGF_learnU (S_sparse,U,U,H,H,V,V,lamb);
-        # H = TriUHV.CGF_learnH (S_sparse,U,U,H,H,V,V);
-        # V = TriUHV.CGF_learnV (S_sparse,U,U,H,H,V,V,lamb);
-        # S_sparse = TriUHV.CGF_learnS (S_sparse,U,H,V,feedback_data);
+        # U = HierLat.CGF_learnU (S_sparse,U,U,H,H,V,V,lamb);
+        # H = HierLat.CGF_learnH (S_sparse,U,U,H,H,V,V);
+        # V = HierLat.CGF_learnV (S_sparse,U,U,H,H,V,V,lamb);
+        # S_sparse = HierLat.CGF_learnS (S_sparse,U,H,V,feedback_data);
         
-        [U,H,V,S_sparse] = TriUHV.Learn (S_sparse,U,H,V,feedback_data,lamb,delta,maxiter);
-        
+        [U,H,V,S_sparse] = HierLat.Learn (S_sparse,U,H,V,feedback_data,lamb,delta,maxiter);
+     
         self.U = U;
         self.H = H;
         self.V = V;
@@ -142,25 +149,147 @@ class TriUHV(CFAlg):
         return result;
     
 ##################################################################################################
+    @staticmethod
+    def df_V (V,prod1,prod2,prod3,lamb): 
+        '''
+        This function the gradient direction for the current value of U,H,V and S_sparse 
+        also we need the S_U, S_H and S_V which is the UHV value associated with S since 
+        S can be decomposed as a low-rank matrix plus a sparse matrix 
+        For an efficient implementation, given the product of H^T*U^T*S_U*S_H*S_V 
+        ,(UH)^T*S_sparse and (UH)^T*UH    
+        --------------------------
+        Inputs
+        V: the current V value
+        prod1: H^T*U^T*S_U*S_H*S_V 
+        prod2: (UH)^T*S_sparse
+        prod3: (UH)^T*UH   
+        
+        Returns 
+        
+        The gradient:
+        -2(UH)^T(S_U*S_H*S_V + S_sparse - UHV) + 2lambV
+        
+        --------------------------
+        Copyright: Shiyu C. (s.chang1@partner.samsung.com)        
+        '''
+        
+        df = -2*prod1 - 2*prod2 + 2*prod3*V + 2*lamb*V;
+         
+        return df;
+    
+##################################################################################################
+    @staticmethod 
+    def Objval_V (Objprod,Objprod4,Objprod5,Objprod6,V,lamb):    
+        '''
+        This function calculate the objective function of \| S - UHV \|_2^2 + \lambda \|V \\_2^2
+        
+        --------------------------
+        Inputs
+        V: the current V value
+        
+        Objprod: Objprod1 + Objprod2 + Objprod3  where Objprod1,Objprod2 and Objprod3 is listed below 
+        
+        Objprod1 = np.trace((S_sparse.T * S_sparse).todense());
+        Objprod2 = 2*np.trace(S_sparse.T*S_U*S_H*S_V);
+        Objprod3 = np.trace(S_V.T*S_H.T*(S_U.T*S_U)*(S_H*S_V));
+        
+        and
+        
+        Objprod4 = S_sparse.T*U*H;
+        Objprod5 = S_V.T*S_H.T*(S_U.T*U)*H;
+        Objprod6 = H.T*U.T*U*H;
+           
+        lamb: the regularization parameter
+        
+        --------------------------
+        Outputs
+            
+        f -- The objective function of \| S - UHV \|_2^2 + \lambda \|V\|_2^2  
+         
+        Copyright: Shiyu C. (s.chang1@partner.samsung.com)
+         
+        '''
+
+#         Objprod4 = S_sparse.T*U*H;
+#         Objprod5 = S_V.T*S_H.T*(S_U.T*U)*H;
+#         Objprod6 = H.T*U.T*U*H;
+        
+        f = Objprod - 2*np.trace(Objprod4*V) - 2*np.trace(Objprod5*V) + np.trace(V.T*Objprod6*V);
+        f += lamb*scipy.linalg.norm(V.todense())**2;
+        
+        return f;
+      
+##################################################################################################
+    @staticmethod 
+    def Objval_V_danteng (S_sparse,U,S_U,H,S_H,V,S_V,lamb):    
+        '''
+        This function calculate the objective function of \| S - UHV \|_2^2 + \lambda \|V \\_2^2 
+        '''
+        temp = (S_U*S_H*S_V + S_sparse) - U*H*V;
+        f = scipy.linalg.norm(temp)**2;
+        f += lamb*scipy.linalg.norm(V.todense())**2;
+        return f;
+    
+##################################################################################################
+    @staticmethod
+    def check_Vgradient (S_sparse,U,S_U,H,S_H,V,S_V,lamb): 
+        
+        [a,b] = V.todense().shape;
+        delta = np.matrix(np.random.rand(a,b));
+        delta = delta / np.linalg.norm(delta);
+        
+        Objprod1 = np.trace((S_sparse.T * S_sparse).todense());
+        Objprod2 = 2*np.trace(S_sparse.T*S_U*S_H*S_V);
+        Objprod3 = np.trace(S_V.T*S_H.T*(S_U.T*S_U)*(S_H*S_V));
+        Objprod = Objprod1 + Objprod2 + Objprod3; 
+        
+        Objprod4 = S_sparse.T*U*H;
+        Objprod5 = S_V.T*S_H.T*(S_U.T*U)*H;
+        Objprod6 = H.T*U.T*U*H;
+           
+           
+        f0 = HierLat.Objval_V (Objprod,Objprod4,Objprod5,Objprod6,V,lamb);
+        
+        df_prod1 = H.T*U.T*S_U*S_H*S_V; 
+        df_prod2 = (U*H).T*S_sparse;
+        df_prod3 =  (U*H).T*U*H;    
+        
+        df0 = HierLat.df_V(V,df_prod1,df_prod2,df_prod3,lamb);
+        
+        epsilon = [0.1,1e-2,1e-3,1e-4,1e-5,1e-6,1e-7];
+        
+        for i in range(len(epsilon)):
+            V_left = scipy.sparse.coo_matrix((V - epsilon[i]*delta));
+            V_right = scipy.sparse.coo_matrix(V + epsilon[i]*delta);
+            f_left = HierLat.Objval_V (Objprod,Objprod4,Objprod5,Objprod6,V_left,lamb);
+            f_right = HierLat.Objval_V (Objprod,Objprod4,Objprod5,Objprod6,V_right,lamb);
+            Vs = (f_right - f_left) / 2;
+            Vs_hat = df0.flatten(1) * ((epsilon[i]*delta).flatten(1)).T;
+            print epsilon[i], Vs/Vs_hat;
+
+        return ;
+    
+##################################################################################################
     
     @staticmethod
-    def CGF_learnU (S_sparse,U,U_prev,H,H_prev,V,V_prev,lamb):
-            # Usage:  Cross-Genre Factorization
-            # This function fixed S, H and V to learn a proper U
-            # author: Shiyu C. (s.chang1@partner.samsung.com) 
-            # date: 01/31/2014
-            
-            r = U.shape[1];
-            I = np.matrix(np.eye(r));
-            # temp = H*V*V.T*H.T;
-            Inv = np.linalg.inv(H*V*V.T*H.T + lamb*I);         
-            HV_transpose = V.T*H.T;
-            U_out = (U_prev*H_prev)*(V_prev*HV_transpose)*Inv + S_sparse*HV_transpose*Inv;
-            return U_out;
+    def learnU (S_sparse,U,U_prev,H,H_prev,V,V_prev,lamb):
+        # Usage:  Cross-Genre Factorization
+        # This function fixed S, H and V to learn a proper U
+        # author: Shiyu C. (s.chang1@partner.samsung.com) 
+        # date: 01/31/2014
+        
+        r = U.shape[1];
+        I = np.matrix(np.eye(r));
+        # temp = H*V*V.T*H.T;
+        Inv = np.linalg.inv(H*V*V.T*H.T + lamb*I);         
+        HV_transpose = V.T*H.T;
+        U_out = (U_prev*H_prev)*(V_prev*HV_transpose)*Inv + S_sparse*HV_transpose*Inv;
+        return U_out;
+        
 ##################################################################################################
         
     @staticmethod
-    def CGF_learnH (S_sparse,U,U_prev,H,H_prev,V,V_prev):
+    def learnH (S_sparse,U,U_prev,H,H_prev,V,V_prev):
         # fix the variable S and U, V and solve for H
         r = U.shape[1];
         g = V.shape[0];
@@ -172,7 +301,7 @@ class TriUHV(CFAlg):
 ################################################################################################## 
    
     @staticmethod
-    def CGF_learnV (S_sparse,U,U_prev,H,H_prev,V,V_prev,lamb):
+    def learnV (S_sparse,U,U_prev,H,H_prev,V,V_prev,lamb):
         # fix the variable S and U H and solve V
         ######################
         # Calculate the closed form solution
@@ -199,7 +328,7 @@ class TriUHV(CFAlg):
     
 ##################################################################################################    
     @staticmethod
-    def CGF_learnS (S_sparse,U,H,V,feedback_data):
+    def learnS (S_sparse,U,H,V,feedback_data):
         # learning S with projection 
         val = feedback_data.data_val;
         idx = zip(S_sparse.row.tolist(),S_sparse.col.tolist());
@@ -234,14 +363,14 @@ class TriUHV(CFAlg):
             counter += 1;
             print "Iteration: ", counter;
             print "Update U"
-            U = TriUHV.CGF_learnU(S_sparse,U,U_prev,H,H_prev,V,V_prev,lamb);    
+            U = HierLat.learnU(S_sparse,U,U_prev,H,H_prev,V,V_prev,lamb);    
 #             temp = (U_prev*H_prev*V_prev + S_sparse) - U*H_prev*V_prev;
 #             obj = scipy.linalg.norm(temp)**2;
 #             obj += lamb*(scipy.linalg.norm(U)**2 + scipy.linalg.norm(V_prev.todense())**2);
 #             print "objective: ", obj;
             
             print "Update H"
-            H = TriUHV.CGF_learnH(S_sparse,U,U_prev,H,H_prev,V,V_prev);    
+            H = HierLat.learnH(S_sparse,U,U_prev,H,H_prev,V,V_prev);    
 #             temp = (U_prev*H_prev*V_prev + S_sparse) - U*H*V_prev;
 #             obj = scipy.linalg.norm(temp)**2;
 #             obj += lamb*(scipy.linalg.norm(U)**2 + scipy.linalg.norm(V_prev.todense())**2);
@@ -249,14 +378,14 @@ class TriUHV(CFAlg):
             
             
             print "Update V"
-            V = TriUHV.CGF_learnV(S_sparse,U,U_prev,H,H_prev,V,V_prev,lamb); 
+            V = HierLat.learnV(S_sparse,U,U_prev,H,H_prev,V,V_prev,lamb); 
 #             temp = (U_prev*H_prev*V_prev + S_sparse) - U*H*V;
 #             obj = scipy.linalg.norm(temp)**2;
 #             obj += lamb*(scipy.linalg.norm(U)**2 + scipy.linalg.norm(V.todense())**2);
 #             print "objective: ", obj;
             
             print "Update S"
-            S_sparse = TriUHV.CGF_learnS(S_sparse,U,H,V,X);
+            S_sparse = HierLat.learnS(S_sparse,U,H,V,X);
     
             # calculate the objective function 
             obj1 = scipy.linalg.norm(np.matrix(S_sparse.data),2)**2;
@@ -270,6 +399,7 @@ class TriUHV(CFAlg):
             print "The delta value: ", checker
             # print max(abs(U-U_prev).max(),abs(V-V_prev).max());
             if checker <= delta:
+                print "Termination condition meet"
                 break;
             U_prev = U;
             H_prev = H;
