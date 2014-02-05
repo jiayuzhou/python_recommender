@@ -4,6 +4,9 @@ This module consists of recommender wrappers for factorization methods.
 Created on Feb 4, 2014
 
 @author: jiayu.zhou
+
+Modified on Feb 5, 2014
+by Jiayu Zhou, added a Dummy recommender as an example. 
 '''
 
 import numpy as np;
@@ -17,20 +20,46 @@ class Recommender(object):
 
     def train(self, feedback_data):
         '''
-        Train model/models using the specified feedback_data. 
+        Train model/models using the specified feedback_data.
+        
+        Parameters
+        ----------
+        feedback_data: the training data in the FeedbackData data structure.  
+        
+        Returns
+        ----------
+        none
         '''
         raise NotImplementedError("Interface method.");
 
     def get_score(self, user_id, item_id_list, meta_data = None):
         '''
         Get the scores of the items whose IDs are in the item_id_list. The 
-        meta_data contains additional information of the items/users.  
+        meta_data contains additional information of the items/users.
+        
+        Parameters
+        ----------
+        user_id: a string representing the ID of the user to be targeted. 
+        item_id_list: a list of item IDs to be recommended.
+        meta_data: an optional extra information.
+        
+        Returns
+        ----------
+        a list of scores, each of which is the score of an item in the tiem_id_list.
         '''
         raise NotImplementedError("Interface method.");
 
     def unique_str(self):
         '''
         Output the unique string to identify the type and configuration of this recommender.    
+
+        Parameters
+        ----------
+        none
+        
+        Returns
+        ----------
+        a unique string representing this recommender.  
         '''
         raise NotImplementedError("Interface method.");
 

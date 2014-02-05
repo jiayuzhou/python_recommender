@@ -2,6 +2,9 @@
 Created on Jan 29, 2014
 
 @author: Shiyu C. (s.chang1@partner.samsung.com)
+
+Modified on Feb 5, 2014
+by Jiayu Zhou, added Rec_LMaFit.  
 '''
 
 import numpy as np;
