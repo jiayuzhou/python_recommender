@@ -10,15 +10,16 @@ Created on Feb 5, 2014
 '''
 
 import numpy as np;
-import time;
 from numpy.linalg import norm;
-from rs.algorithms.optimization.optimizer import Optimizer;
+from rs.algorithms.optimization.optimizer import ProxOptimizer;
 from rs.algorithms.optimization.linesearch import curvtrack;
 
-class Opt_SpaRSA(Optimizer):
+class Opt_SpaRSA(ProxOptimizer):
     '''
     Optimization algorithm: SpaRSA. 
     '''
+    
+    default_optimizer = None;
 
     def __init__(self, backtrack_mem = 10, desc_param = 0.0001, \
                  max_fun_eval = 50000, max_iter = 5000, ftol = 1e-9, optim_tol = 1e-6, xtol = 1e-9,\
@@ -34,11 +35,46 @@ class Opt_SpaRSA(Optimizer):
         self.optim_tol     = optim_tol;
         self.xtol          = xtol;
         self.verbose       = verbose;
+    
+    @classmethod
+    def Set_default_optimizer(cls, backtrack_mem = 10, desc_param = 0.0001, \
+                 max_fun_eval = 50000, max_iter = 5000, ftol = 1e-9, optim_tol = 1e-6, xtol = 1e-9,\
+                  verbose = 0):
+        '''
+        Create and set the default optimizer. 
+        '''
+        cls.default_optimizer = Opt_SpaRSA(backtrack_mem, desc_param, \
+                 max_fun_eval, max_iter, ftol, optim_tol, xtol, verbose);
+        
+    @classmethod
+    def Optimize(cls, smoothF, nonsmoothF, x):
+        '''
+        Perform optimization using the default optimizer. To use customized optimizer, 
+        please access optimize(smooth, nonsmoothF, x) method by creating an 
+        optimization instance. 
+        '''        
+        if not cls.default_optimizer:
+            cls.default_optimizer = Opt_SpaRSA();
+        return cls.default_optimizer(smoothF, nonsmoothF, x);
         
     
     def optimize(self, smoothF, nonsmoothF, x):
         '''
         Optimize min(x) smoothF(x) + nonsmoothF(x)
+        
+        Parameters
+        ----------
+        smoothF:    function value and graidnet of the smooth part. 
+        nonsmoothF: function value and proximal gradient of the non-smooth part.
+                    See proximal in rs.algorithms.optimization.optimizer
+        x:          starting point.
+        
+        Returns
+        ----------
+        out = [x, f_x, output]
+        x:      the optimal solution
+        f_x:    the function value of the optimal solution. 
+        output: solver information. 
         ''' 
         
         iter_num = 0;
@@ -76,8 +112,8 @@ class Opt_SpaRSA(Optimizer):
         
         # optimality of the starting point.
         if optim <= self.optim_tol:
-            flag = Optimizer.FLAG_OPTIM;
-            msg  = Optimizer.MESSAGE_OPTIM;
+            flag = ProxOptimizer.FLAG_OPTIM;
+            msg  = ProxOptimizer.MESSAGE_OPTIM;
             loop = 0;
         
         
@@ -130,24 +166,24 @@ class Opt_SpaRSA(Optimizer):
             
             # stop condition
             if optim <= self.optim_tol:
-                flag  = Optimizer.FLAG_OPTIM;
-                msg   = Optimizer.MESSAGE_OPTIM;
+                flag  = ProxOptimizer.FLAG_OPTIM;
+                msg   = ProxOptimizer.MESSAGE_OPTIM;
                 loop  = 0;
             elif norm(x - x_old, np.inf) / max(1, norm(x_old, np.inf)) <= self.xtol:
-                flag  = Optimizer.FLAG_XTOL;
-                msg   = Optimizer.MESSAGE_XTOL;
+                flag  = ProxOptimizer.FLAG_XTOL;
+                msg   = ProxOptimizer.MESSAGE_XTOL;
                 loop  = 0;
             elif abs(f_old[-1] - f_x) / max(1, abs(f_old[-1])) <= self.ftol:
-                flag  = Optimizer.FLAG_FTOL;
-                msg   = Optimizer.MESSAGE_XTOL;
+                flag  = ProxOptimizer.FLAG_FTOL;
+                msg   = ProxOptimizer.MESSAGE_XTOL;
                 loop  = 0;
             elif iter_num >= self.max_iter:
-                flag  = Optimizer.FLAG_MAXITER;
-                msg   = Optimizer.MESSAGE_MAXITER;
+                flag  = ProxOptimizer.FLAG_MAXITER;
+                msg   = ProxOptimizer.MESSAGE_MAXITER;
                 loop  = 0;
             elif fun_evals >= self.max_fun_eval:
-                flag  = Optimizer.FLAG_MAXFEV;
-                msg   = Optimizer.MESSAGE_MAXFEV;
+                flag  = ProxOptimizer.FLAG_MAXFEV;
+                msg   = ProxOptimizer.MESSAGE_MAXFEV;
                 loop  = 0;
                   
         # clean-up trace (only show the first iter_num +1 ) before exit. 
