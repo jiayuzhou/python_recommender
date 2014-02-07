@@ -10,6 +10,7 @@ Created on Feb 5, 2014
 '''
 
 import numpy as np;
+import time;
 from numpy.linalg import norm;
 from rs.algorithms.optimization.optimizer import Optimizer;
 from rs.algorithms.optimization.linesearch import curvtrack;
@@ -38,7 +39,8 @@ class Opt_SpaRSA(Optimizer):
     def optimize(self, smoothF, nonsmoothF, x):
         '''
         Optimize min(x) smoothF(x) + nonsmoothF(x)
-        '''
+        ''' 
+        
         iter_num = 0;
         loop = 1;
         
@@ -49,12 +51,12 @@ class Opt_SpaRSA(Optimizer):
         trace['optim']      = np.zeros(self.max_iter + 1);
         
         if self.verbose >0:
-            print ' %4s   %6s  %6s  %12s  %12s  %12s \n' %\
+            print ' %4s   %6s  %6s  %12s  %12s  %12s' %\
                 ('','Fun.', 'Prox', 'Step len.', 'Obj. val.', 'Optim.' );
         
         # function value at starting point. 
         [g_x, grad_g_x] = smoothF(x);
-        h_x             = nonsmoothF(x);
+        [h_x, _]        = nonsmoothF(x);
         f_x             = g_x + h_x;
         
         # collect data for display/output
@@ -69,7 +71,7 @@ class Opt_SpaRSA(Optimizer):
         trace['optim'][1]      = optim;
         
         if self.verbose > 0:
-            print ' %4d | %6d  %6d  %12s  %12.4e  %12.4e\n' \
+            print ' %4d | %6d  %6d  %12s  %12.4e  %12.4e' \
                    % ( iter_num, fun_evals, prox_evals, '', f_x, optim );
         
         # optimality of the starting point.
@@ -78,13 +80,14 @@ class Opt_SpaRSA(Optimizer):
             msg  = Optimizer.MESSAGE_OPTIM;
             loop = 0;
         
+        
         ## Main Loop
         
         # temporarily set variables. 
         x_old = x;
         grad_f_old = grad_g_x;
         f_old = np.zeros(0);
-        
+       
         while loop:
             iter_num += 1;
             
@@ -93,24 +96,27 @@ class Opt_SpaRSA(Optimizer):
                 s = x - x_old;
                 y = grad_g_x - grad_f_old;
                 BBstep = (y.T * s)/(y.T * y);
+                BBstep = BBstep[0,0];
                 if BBstep <= 1e-9 or 1e9 <= BBstep:
-                    BBstep = min(1, 1/norm(grad_g_x, 1));
+                    BBstep = np.minimum(1, 1/norm(grad_g_x, 1));
             else:
-                BBstep = min(1, 1/norm(grad_g_x, 1));
+                BBstep = np.minimum(1, 1/norm(grad_g_x, 1));                
            
             # STEP2 line search.
             x_old = x;
             if iter_num + 1 > self.backtrack_mem:
-                f_old = np.concatenate((f_old[1:], f_x));
+                f_old = np.append(f_old[1:], f_x);
             else:
-                f_old[iter_num] = f_x;
+                #f_old[iter_num] = f_x;
+                f_old = np.append(f_old, f_x);
             grad_f_old = grad_g_x;
             
             # line search. the ignored flag curvtrack_flag can be used to identify possible issues 
-            #              in the line search procedure. 
+            #              in the line search procedure.
             [x, f_x, grad_g_x, step, _, curvtrack_iters] = \
                 curvtrack(x, - grad_g_x, BBstep, f_old, - norm(grad_g_x) **2, smoothF,\
                           nonsmoothF, self.desc_param,  self.xtol, self.max_fun_eval - fun_evals); 
+            
             
             # update statistics for display/output/termination.
             fun_evals   = fun_evals  + curvtrack_iters;
@@ -131,16 +137,19 @@ class Opt_SpaRSA(Optimizer):
                 flag  = Optimizer.FLAG_XTOL;
                 msg   = Optimizer.MESSAGE_XTOL;
                 loop  = 0;
-            elif abs(f_old - f_x) / max(1, abs(f_old)) <= self.ftol:
+            elif abs(f_old[-1] - f_x) / max(1, abs(f_old[-1])) <= self.ftol:
                 flag  = Optimizer.FLAG_FTOL;
                 msg   = Optimizer.MESSAGE_XTOL;
+                loop  = 0;
             elif iter_num >= self.max_iter:
                 flag  = Optimizer.FLAG_MAXITER;
                 msg   = Optimizer.MESSAGE_MAXITER;
+                loop  = 0;
             elif fun_evals >= self.max_fun_eval:
                 flag  = Optimizer.FLAG_MAXFEV;
                 msg   = Optimizer.MESSAGE_MAXFEV;
-                
+                loop  = 0;
+                  
         # clean-up trace (only show the first iter_num +1 ) before exit. 
         trace['f_x']        = trace['f_x'][0:iter_num+1];
         trace['fun_evals']  = trace['fun_evals'][0:iter_num+1];
