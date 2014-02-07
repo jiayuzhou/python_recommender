@@ -22,7 +22,7 @@ class Opt_SpaRSA(ProxOptimizer):
     default_optimizer = None;
 
     def __init__(self, backtrack_mem = 10, desc_param = 0.0001, \
-                 max_fun_eval = 50000, max_iter = 5000, ftol = 1e-9, optim_tol = 1e-6, xtol = 1e-9,\
+                 max_fun_eval = 50000, max_iter = 1000, ftol = 1e-6, optim_tol = 1e-6, xtol = 1e-6,\
                   verbose = 0):
         '''
         Constructor
@@ -38,7 +38,7 @@ class Opt_SpaRSA(ProxOptimizer):
     
     @classmethod
     def Set_default_optimizer(cls, backtrack_mem = 10, desc_param = 0.0001, \
-                 max_fun_eval = 50000, max_iter = 5000, ftol = 1e-9, optim_tol = 1e-6, xtol = 1e-9,\
+                 max_fun_eval = 50000, max_iter = 1000, ftol = 1e-6, optim_tol = 1e-6, xtol = 1e-6,\
                   verbose = 0):
         '''
         Create and set the default optimizer. 

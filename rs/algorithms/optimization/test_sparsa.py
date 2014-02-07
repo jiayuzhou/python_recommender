@@ -38,19 +38,27 @@ if __name__ == '__main__':
                 [1.7, 1.8, 1.9, 2.0]])
     y = np.mat([[-0.1], [-0.2], [0], [+ 0.1], [+0.2]]);
     
-    lamb = 0.5;
+    lamb = 0.1;
     
     smoothF = lambda w: least_squares(w, X, y);
     nonsmoothF = prox_l1(lamb);
     
-    optimizer = Opt_SpaRSA(verbose = 1);
+    optimizer = Opt_SpaRSA(verbose = 10);
     
     #x0 = np.mat(np.zeros((d, 1)));
     #x0 = np.mat(np.random.randn(d, 1));
     x0 = np.mat(np.ones((d, 1)));
     
     tic = timeit.default_timer();
-    optimizer.optimize(smoothF, nonsmoothF, x0);
+    [xopt, _, _] = optimizer.optimize(smoothF, nonsmoothF, x0);
     toc = timeit.default_timer();
     elapsed = toc - tic;
     print 'Elapsed time is ', str(elapsed);
+    
+    print xopt;
+    
+    # sparsity.
+    nnz = np.sum(xopt!=0);
+    print 'Sparsity: ', str(nnz/d);
+    
+    
