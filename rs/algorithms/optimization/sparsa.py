@@ -11,7 +11,7 @@ Created on Feb 5, 2014
 
 import numpy as np;
 from numpy.linalg import norm;
-from rs.algorithms.optimization.optimizer import ProxOptimizer;
+from rs.algorithms.optimization.prox import ProxOptimizer;
 from rs.algorithms.optimization.linesearch import curvtrack;
 
 class Opt_SpaRSA(ProxOptimizer):

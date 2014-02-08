@@ -8,20 +8,8 @@ Created on Feb 5, 2014
 import timeit;
 import numpy as np;
 from rs.algorithms.optimization.sparsa import Opt_SpaRSA; 
-from rs.algorithms.optimization.optimizer import prox_l1
-
-
-def least_squares(w, X, y):
-    '''
-    least squares loss. 
-    MATLAB verified function. 
-    '''
-    Xw_y = np.dot(X, w) - y;
-    
-    f = 0.5 * np.linalg.norm(Xw_y, 'fro')**2;
-    g = np.dot(X.T, Xw_y); 
-    g = g.reshape(g.shape[0] * g.shape[1] , 1, order = 'F');
-    return [f, g];
+from rs.algorithms.optimization.prox import prox_l1
+from rs.algorithms.optimization.smooth import least_squares;
 
 if __name__ == '__main__':
 #     n = 500;
