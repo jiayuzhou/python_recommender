@@ -191,7 +191,11 @@ class Opt_SpaRSA(ProxOptimizer):
         trace['fun_evals']  = trace['fun_evals'][0:iter_num+1];
         trace['prox_evals'] = trace['prox_evals'][0:iter_num+1];
         trace['optim']      = trace['optim'][0:iter_num+1];
-                
+        
+        if self.verbose > 0 and iter_num % self.verbose >0:
+            print ' %4d | %6d  %6d  %12.4e  %12.4e  %12.4e'\
+                     % (iter_num, fun_evals, prox_evals, step, f_x, optim);
+        
         output = {'flag':flag, 'fun_evals':fun_evals, 'iters':iter_num, \
                   'optim':optim, 'prox_evals': prox_evals, 'trace': trace,
                   'msg': msg};
