@@ -118,7 +118,7 @@ class DailyWatchTimeReader(object):
         else:
             return URM.LoadResource(URM.RTYPE_DATA, res_str);
     
-    def read_file_with_id_list(self, filename, duidlist, pidlist):
+    def read_file_with_id_list(self, filename, duidlist, pidlist, ignore_prog_without_genre = True):
         '''
         This file reads an aggregated file. 
         The file only include the specified duid and pid.  
@@ -141,7 +141,13 @@ class DailyWatchTimeReader(object):
             for logrow in logreader:
                 log_duid      = logrow[self.fieldMapping['duid']];
                 log_pid       = logrow[self.fieldMapping['pid']];
-                log_pg_gr     = logrow[self.fieldMapping['genre']];
+                log_pg_gr     = logrow[self.fieldMapping['genre']].strip();
+                
+                if not log_pg_gr:
+                    Logger.Log('Empty genre information for program '+log_pid, Logger.MSG_CATEGORY_DATA);
+                    if ignore_prog_without_genre:
+                        # ignore records whose program has no genre information. 
+                        continue;
                 
                 ## we need both duid and pid are in the list. 
                 if (log_duid in duidlist) and (log_pid in pidlist):
@@ -156,12 +162,12 @@ class DailyWatchTimeReader(object):
                         mapping_pid[log_pid]   = len(mapping_pid);
                     col.append(mapping_pid[log_pid]);
                     
-                    # store program - genre mappings. 
-                    for pg_gr in log_pg_gr.split(','):
-                        if not pg_gr:
-                            Logger.Log('Empty genre information for program '+log_pid, Logger.MSG_CATEGORY_DATA);
-                            continue;
-                        if not mapping_pid[log_pid] in visited_program_list:
+                    # store program - genre mappings, for programs that were not visited before.
+                    if not mapping_pid[log_pid] in visited_program_list: 
+                        for pg_gr in log_pg_gr.split(','):
+                            if not pg_gr:
+                                continue;
+                            
                             pggr_pg.append(mapping_pid[log_pid]);
                             pggr_gr.append(int(pg_gr));
                             visited_program_list.add(mapping_pid[log_pid]);

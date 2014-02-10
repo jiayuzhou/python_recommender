@@ -2,14 +2,19 @@
 Created on Feb 5, 2014
 
 @author: Shiyu C. (s.chang1@partner.samsung.com)
+         
+Modified by Jiayu Z on Feb 9th: added projected gradient solver for V. 
 
 '''
 
 import numpy as np;
-from rs.algorithms.recommendation.generic_recalg import CFAlg;
-from rs.utils.log import Logger; 
 import scipy.sparse;
 import scipy.linalg
+from rs.utils.log import Logger; 
+from rs.algorithms.recommendation.generic_recalg import CFAlg;
+from rs.algorithms.optimization.prox import projfun_probability_simplex,\
+    proximal
+from rs.algorithms.optimization.sparsa import Opt_SpaRSA
 
 
 
@@ -41,9 +46,12 @@ class HierLat(CFAlg):
         
         self.verbose = verbose;
         
+        
+        self.optimizer = Opt_SpaRSA(verbose = 10);
+        
 ##################################################################################################
         
-    def train(self, feedback_data):
+    def train(self, feedback_data, simplex_projection = True):
         '''
         Train the model with specified feedback_data. 
         WARNING: calling this function will erase previous training information. 
@@ -71,18 +79,19 @@ class HierLat(CFAlg):
         m = feedback_data.num_row;
         n = feedback_data.num_col;  
         r = self.latent_factor;
-        g = 330;
+        #TODO: consider a second mapping here.  
+        g = max([330, np.max(meta['pggr_gr']) + 1]); 
+        
         #print meta
         #print type(meta['pggr_pg']);
         #print type(meta['pggr_gr']);
         if len(meta['pggr_pg']) != len(meta['pggr_gr']):
             raise ValueError("The length of the meta data mismatched.")
-        V_val = [1 for i in range(len(meta['pggr_pg']))];
+        
+        #TODO: for those programs without genre information. 
+        
+        V_val = [1 for i in range(len(meta['pggr_pg']))];   #@UnusedVariable
         # print V_val 
-            
-        lamb = self.lamb;
-        delta = self.delta;
-        maxiter = self.maxiter;
                 
         self.row = m;
         self.col = n;
@@ -112,8 +121,13 @@ class HierLat(CFAlg):
         # V = HierLat.CGF_learnV (S_sparse,U,U,H,H,V,V,lamb);
         # S_sparse = HierLat.CGF_learnS (S_sparse,U,H,V,feedback_data);
         
-        [U,H,V,S_sparse] = HierLat.Learn (S_sparse,U,H,V,feedback_data,lamb,delta,maxiter);
-     
+        
+        # core learning. 
+        if simplex_projection:
+            [U, H, V, S_sparse] = self.learn_simplex_proj(S_sparse, U, H, V, feedback_data);
+        else:
+            [U, H, V, S_sparse] = self.learn_no_proj (S_sparse,U,H,V,feedback_data);
+        
         self.U = U;
         self.H = H;
         self.V = V;
@@ -249,7 +263,7 @@ class HierLat(CFAlg):
         Objprod6 = H.T*U.T*U*H;
            
            
-        f0 = HierLat.Objval_V (Objprod,Objprod4,Objprod5,Objprod6,V,lamb);
+        f0 = HierLat.Objval_V (Objprod,Objprod4,Objprod5,Objprod6,V,lamb); #@UnusedVariable
         
         df_prod1 = H.T*U.T*S_U*S_H*S_V; 
         df_prod2 = (U*H).T*S_sparse;
@@ -292,15 +306,100 @@ class HierLat(CFAlg):
     @staticmethod
     def learnH (S_sparse,U,U_prev,H,H_prev,V,V_prev):
         # fix the variable S and U, V and solve for H
-        r = U.shape[1];
-        g = V.shape[0];
+        #r = U.shape[1];
+        #g = V.shape[0];
         Inv1 = np.linalg.pinv(U.T*U); # An rxr matrix
         Inv2 = np.linalg.pinv((V*V.T).todense());  # An gxg matrix
         H_out = Inv1*(U.T*U_prev)*H_prev*(V_prev*V.T)*Inv2 + Inv1*((U.T*S_sparse)*V.T)*Inv2;
         return H_out;
     
 ################################################################################################## 
+    
+    
+    def learnV_simplex(self, S_sparse, U, S_U, H, S_H, V_old, S_V): 
+        '''
+        This method updates V using the simplex projected gradient. Because 
+        the elements that are not in the coordinates in self.V_zip_idx will always
+        stays at 0, and thus the gradient works only at self.V_zip_idx.  
+        
+        The method implicitly requires to access the following instance variable:
+            self.V_row_idx, self.V_col_idx, self.V_zip_idx, self.V_col_idxptr
+        which are initialized in learn_simplex_proj. 
+        '''
+        # computing shared information.
+        Objprod1 = np.trace((S_sparse.T * S_sparse).todense());
+        Objprod2 = 2*np.trace(S_sparse.T*S_U*S_H*S_V);
+        Objprod3 = np.trace(S_V.T*S_H.T*(S_U.T*S_U)*(S_H*S_V));
+        Objprod = Objprod1 + Objprod2 + Objprod3; 
+        
+        Objprod4 = S_sparse.T*U*H;
+        Objprod5 = S_V.T*S_H.T*(S_U.T*U)*H;
+        Objprod6 = H.T*U.T*U*H;
+         
+        df_prod1 = H.T*U.T*S_U*S_H*S_V; 
+        df_prod2 = (U*H).T*S_sparse;
+        df_prod3 = (U*H).T*U*H;    
+        
+        # the starting point is the value at the previous solution.   
+        x0 = V_old.data;  
+        
+        ### smooth part. 
+        def smoothF(x):
+            # reshape x into matrix.
+            V = scipy.sparse.coo_matrix((x,(self.V_row_idx, self.V_col_idx)), shape = V_old.shape);
+            # function value and gradient. 
+            f0 = HierLat.Objval_V (Objprod,Objprod4,Objprod5,Objprod6,V, self.lamb); 
+            df_V = HierLat.df_V(V,df_prod1,df_prod2,df_prod3,self.lamb);
+            # get the non-zero elements at x. 
+            df0 = np.array([ df_V[vi, vj] for vi, vj in self.v_zip_idx ]);
+            
+            return [f0, df0];
+        
+        ### non-smooth part. 
+        gx     = lambda x    : 0;
+        # projection on (columns of) V. 
+        gprox  = lambda x, t : HierLat.proj_matrix_nneg_simplex(x, self.V_col_idxptr, 1) ; 
+            
+        nonsmoothF = proximal(gx, gprox);
+        
+        # call solver. 
+        [xopt, _, _] = self.optimizer.optimize(smoothF, nonsmoothF, x0);
+        
+        # updated V from xopt. 
+        V = scipy.sparse.coo_matrix((xopt,(self.V_row_idx, self.V_col_idx)), shape = V_old.shape);
+        
+        return V;
    
+    @staticmethod
+    def proj_matrix_nneg_simplex(x, V_col_idxptr, simplex_size):
+        '''
+        project V back to the simplex.
+        V_col_idxptr (index vector)
+        '''
+        x = x.copy(); 
+        # for each column of V we perform simplex projection.
+        for cc in range(len(V_col_idxptr) - 1):
+            idx_start = V_col_idxptr[cc];
+            idx_end   = V_col_idxptr[cc+1];
+            # when the column has non zero elements, then perform simplex projection. 
+            if idx_start < idx_end:
+                #tt1 = x[idx_start:idx_end];
+                #ttp = projfun_probability_simplex(tt1, simplex_size);
+                #x[idx_start:idx_end] = ttp;
+                
+                tp = x[idx_start:idx_end];
+                tt = projfun_probability_simplex(tp, simplex_size);
+                if np.sum(np.isnan(tt)) > 0:
+                    print 'wtf';
+                
+                x[idx_start:idx_end] = projfun_probability_simplex(x[idx_start:idx_end], simplex_size);        
+        return x;
+        ## check routine. 
+        #ss = scipy.sparse.rand(3,5, 0.5)
+        #print ss.todense();
+        #ss.data = HierLat.proj_matrix_nneg_simplex(ss.data, ss.tocsc().indptr, 1);
+        #print ss.todense();
+        
     @staticmethod
     def learnV (S_sparse,U,U_prev,H,H_prev,V,V_prev,lamb):
         # fix the variable S and U H and solve V
@@ -328,6 +427,7 @@ class HierLat(CFAlg):
         return V_out;
     
 ##################################################################################################    
+    
     @staticmethod
     def learnS (S_sparse,U,H,V,feedback_data):
         # learning S with projection 
@@ -346,11 +446,62 @@ class HierLat(CFAlg):
         temp3 = np.array(temp3);
         S_sparse.data = temp3;
         return S_sparse;
+      
+    def learn_simplex_proj (self, S_sparse,U,H,V,X):
+        # record the column/row information of V.
+        self.V_row_idx    = V.row; 
+        self.V_col_idx    = V.col;
+        self.v_zip_idx    = zip(V.row, V.col);
+        self.V_col_idxptr = V.tocsc().indptr; # starting/end of each column. 
+        
+        # normalize columns of V so the initial solution of V falls into the 
+        # feasible region (non-negative region).
+        V.data = HierLat.proj_matrix_nneg_simplex(V.data, self.V_col_idxptr, 1);
+        
+        counter = 0;
+        U_prev = U;
+        H_prev = H;
+        V_prev = V;
+        while counter < self.maxiter :
+            # print counter
+            counter += 1;
+            print "Iteration: ", counter;
+            print "Update U..."
+            U = HierLat.learnU(S_sparse,U,U_prev,H,H_prev,V,V_prev, self.lamb);    
+            
+            print "Update H..."
+            H = HierLat.learnH(S_sparse,U,U_prev,H,H_prev,V,V_prev);    
+            
+            print "Update V with prob. simplex projection..."
+            V = self.learnV_simplex (S_sparse,U,U_prev,H,H_prev,V,V_prev); 
+            
+            print "Update S..."
+            S_sparse = HierLat.learnS(S_sparse,U,H,V,X);
     
-##################################################################################################    
+            # calculate the objective function 
+            obj1 = scipy.linalg.norm(np.matrix(S_sparse.data),2)**2;
+            obj2 = self.lamb*(scipy.linalg.norm(U)**2 + scipy.linalg.norm(V.todense())**2)
+            obj = obj1 + obj2;
+            print "The objective value: ", obj;
+            # print scipy.linalg.norm(S_sparse.todense())**2;
+            
+            # check the termination condition
+            checker = max(abs(U-U_prev).max(),abs(V-V_prev).max());
+            print "The delta value: ", checker
+            # print max(abs(U-U_prev).max(),abs(V-V_prev).max());
+            if checker <= self.delta:
+                print "Termination condition meet"
+                break;
+            U_prev = U;
+            H_prev = H;
+            V_prev = V;
+            
+        return [U,H,V,S_sparse];
     
-    @staticmethod
-    def Learn (S_sparse,U,H,V,X,lamb,delta,maxiter):
+    def learn_no_proj (self, S_sparse, U, H, V, X):
+        '''
+        No projection (equivalent to Pure Tri-Factorization);
+        '''
         # the objective function is given as
         # min \|S - UV\|_F^2, s.t. \mathcal{P}(S) = \mathcal{P}(X)
         # input: the utility matrix X
@@ -359,12 +510,12 @@ class HierLat(CFAlg):
         U_prev = U;
         H_prev = H;
         V_prev = V;
-        while counter < maxiter :
+        while counter < self.maxiter :
             # print counter
             counter += 1;
             print "Iteration: ", counter;
             print "Update U"
-            U = HierLat.learnU(S_sparse,U,U_prev,H,H_prev,V,V_prev,lamb);    
+            U = HierLat.learnU(S_sparse,U,U_prev,H,H_prev,V,V_prev, self.lamb);    
 #             temp = (U_prev*H_prev*V_prev + S_sparse) - U*H_prev*V_prev;
 #             obj = scipy.linalg.norm(temp)**2;
 #             obj += lamb*(scipy.linalg.norm(U)**2 + scipy.linalg.norm(V_prev.todense())**2);
@@ -377,9 +528,8 @@ class HierLat(CFAlg):
 #             obj += lamb*(scipy.linalg.norm(U)**2 + scipy.linalg.norm(V_prev.todense())**2);
 #             print "objective: ", obj;
             
-            
             print "Update V"
-            V = HierLat.learnV(S_sparse,U,U_prev,H,H_prev,V,V_prev,lamb); 
+            V = HierLat.learnV(S_sparse,U,U_prev,H,H_prev,V,V_prev,self.lamb); 
 #             temp = (U_prev*H_prev*V_prev + S_sparse) - U*H*V;
 #             obj = scipy.linalg.norm(temp)**2;
 #             obj += lamb*(scipy.linalg.norm(U)**2 + scipy.linalg.norm(V.todense())**2);
@@ -390,7 +540,7 @@ class HierLat(CFAlg):
     
             # calculate the objective function 
             obj1 = scipy.linalg.norm(np.matrix(S_sparse.data),2)**2;
-            obj2 = lamb*(scipy.linalg.norm(U)**2 + scipy.linalg.norm(V.todense())**2)
+            obj2 = self.lamb*(scipy.linalg.norm(U)**2 + scipy.linalg.norm(V.todense())**2)
             obj = obj1 + obj2;
             print "The objective value: ", obj;
             # print scipy.linalg.norm(S_sparse.todense())**2;
@@ -399,7 +549,7 @@ class HierLat(CFAlg):
             checker = max(abs(U-U_prev).max(),abs(V-V_prev).max());
             print "The delta value: ", checker
             # print max(abs(U-U_prev).max(),abs(V-V_prev).max());
-            if checker <= delta:
+            if checker <= self.delta:
                 print "Termination condition meet"
                 break;
             U_prev = U;

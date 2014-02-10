@@ -59,22 +59,16 @@ def prox_l1(lamb):
     # construct proximal methods.  
     return proximal(gx, gprox);
 
-def proj_nonneg_simplex(lamb):
-    '''
-    Projection to the non-negative simplex
+def projfun_probability_simplex(v, lamb):
+    # check if the vector is column vector.
     
-    Parameters
-    ----------
-    lamb: the 
-    '''
-    
-    # this is column vector projector.
-    def project(v):
-        # check if the vector is column vector.
-        if not v.shape[1] == 1: 
-            raise ValueError('the variable to be projected should be a column vector.') 
+    # work.
+    if isinstance(v, np.matrix):
+        if not v.shape[1] == 1:
+            raise ValueError('the variable to be projected should be a column vector.');
+        if v.shape[0] == 1:
+            return np.matrix(lamb);
         
-        # work.
         v = np.multiply(v > 0, v);
         #u = np.sort(v)[::-1, ::-1];   # sort and reverse.
         u = np.sort(v, axis = 0)[::-1];   # sort and reverse. 
@@ -85,9 +79,34 @@ def proj_nonneg_simplex(lamb):
         theta = np.max([0, (sv[rho - 1] - lamb) / rho]);
         xx = np.maximum(v - theta, 0);
         return xx;
+    elif isinstance(v, np.ndarray):
+        if len(v.shape)>1:
+            raise ValueError('the variable to be projected should be 1d ndarray.');
+        if v.shape[0] == 1:
+            return np.array([lamb]);
+        
+        v = np.multiply(v > 0, v);
+        u = np.sort(v)[::-1];   # sort and reverse. 
+        sv = np.cumsum(u).T;
+        srt = (sv - lamb)/ (np.array(range(v.shape[0])) + 1);
+        
+        rho = np.max(np.nonzero(u > srt)[0]) + 1 # find.
+        theta = np.max([0, (sv[rho - 1] - lamb) / rho]);
+        xx = np.maximum(v - theta, 0);
+        return xx;
+    else:
+        raise ValueError('unsupported projection type.')
 
+def proj_nonneg_simplex(lamb):
+    '''
+    Projection to the non-negative simplex
+    
+    Parameters
+    ----------
+    lamb: the 
+    '''
     gx     = lambda x    : 0;
-    gprox  = lambda x, t : project(x);
+    gprox  = lambda x, t : projfun_probability_simplex(x, lamb);
     # construct proximal methods. 
     return proximal(gx, gprox);
 
@@ -96,17 +115,30 @@ if __name__ == '__main__':
     simplex_projector = proj_nonneg_simplex(1);
     
     v = [2.81472368639318, 2.90579193707562, 2.12698681629351, 2.91337585613902, 2.63235924622541, \
-         2.09754040499941, 2.27849821886705, 2.54688151920498, 2.95750683543430, 2.96488853519928] 
+         2.09754040499941, 2.27849821886705, 2.54688151920498, 2.95750683543430, 2.96488853519928]
+    print '------np.ndarray-----'
+    
+    varr = np.array(v);
+    print 'Original ndarray vector:'
+    print varr;
+    print 'Projected ndarray vector:'
+    print projfun_probability_simplex(varr, 1);
+    
+    
+    print '------np.matrix------' 
     v = np.matrix(v).T - 2.5;
-    print 'Original vector:'
+    print 'Original matrix vector:'
     print v.T;
     
     [_, pv] = simplex_projector(v, 0);
-    print 'Projected vector:'
+    print 'Projected matrix vector:'
     print pv.T;
     
     print 'Sum:' 
     print np.sum(pv);
+    
+    
+    
     
     pass;
 

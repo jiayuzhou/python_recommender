@@ -131,8 +131,15 @@ class Opt_SpaRSA(ProxOptimizer):
             if iter_num > 1:
                 s = x - x_old;
                 y = grad_g_x - grad_f_old;
-                BBstep = (y.T * s)/(y.T * y);
-                BBstep = BBstep[0,0];
+                
+                if isinstance(x, np.ndarray):
+                    BBstep = np.dot(y, s) / np.dot(y, y);
+                elif isinstance(x, np.matrix):
+                    BBstep = (y.T * s)/(y.T * y);
+                    BBstep = BBstep[0,0];
+                else:
+                    raise ValueError('Unknown data structure: ', str(type(x)));
+                    
                 if BBstep <= 1e-9 or 1e9 <= BBstep:
                     BBstep = np.minimum(1, 1/norm(grad_g_x, 1));
             else:
@@ -195,7 +202,9 @@ class Opt_SpaRSA(ProxOptimizer):
         if self.verbose > 0 and iter_num % self.verbose >0:
             print ' %4d | %6d  %6d  %12.4e  %12.4e  %12.4e'\
                      % (iter_num, fun_evals, prox_evals, step, f_x, optim);
-        
+        if self.verbose > 0:
+            print msg;
+            
         output = {'flag':flag, 'fun_evals':fun_evals, 'iters':iter_num, \
                   'optim':optim, 'prox_evals': prox_evals, 'trace': trace,
                   'msg': msg};
