@@ -110,6 +110,15 @@ def proj_nonneg_simplex(lamb):
     # construct proximal methods. 
     return proximal(gx, gprox);
 
+def proj_nonneg():
+    '''
+    Projection to the non-negative half-space. 
+    '''
+    gx     = lambda x    : 0;
+    gprox  = lambda x, t : np.multiply(x > 0, x);
+    # construct proximal methods. 
+    return proximal(gx, gprox);
+
 if __name__ == '__main__':
     print 'test proj_nonneg_simplex(lamb)'
     simplex_projector = proj_nonneg_simplex(1);
@@ -137,6 +146,19 @@ if __name__ == '__main__':
     print 'Sum:' 
     print np.sum(pv);
     
+    
+    print 'non-negative half-space projection'
+    v = [2.81472368639318, 2.90579193707562, 2.12698681629351, 2.91337585613902, 2.63235924622541, \
+         2.09754040499941, 2.27849821886705, 2.54688151920498, 2.95750683543430, 2.96488853519928]
+    nneg_projector = proj_nonneg();
+    print '------np.matrix------' 
+    v = np.matrix(v).T - 2.5;
+    print 'Original matrix vector:'
+    print v.T;
+    
+    [_, pv] = nneg_projector(v, 0);
+    print 'Projected matrix vector:'
+    print pv.T;
     
     
     

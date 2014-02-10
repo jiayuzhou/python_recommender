@@ -2,14 +2,19 @@
 Created on Feb 5, 2014
 
 @author: Shiyu C. (s.chang1@partner.samsung.com)
+         Jiayu Zhou
          
 Modified by Jiayu Z on Feb 9th: added projected gradient solver for V. 
+     Added algorithms for simplex projection on V.
+     Modified S. 
 
 '''
 
 import numpy as np;
 import scipy.sparse;
 import scipy.linalg
+import timeit;
+
 from rs.utils.log import Logger; 
 from rs.algorithms.recommendation.generic_recalg import CFAlg;
 from rs.algorithms.optimization.prox import projfun_probability_simplex,\
@@ -47,7 +52,7 @@ class HierLat(CFAlg):
         self.verbose = verbose;
         
         
-        self.optimizer = Opt_SpaRSA(verbose = 10);
+        self.optimizer = Opt_SpaRSA(verbose = 1);
         
 ##################################################################################################
         
@@ -301,6 +306,23 @@ class HierLat(CFAlg):
         U_out = (U_prev*H_prev)*(V_prev*HV_transpose)*Inv + S_sparse*HV_transpose*Inv;
         return U_out;
         
+    def learnU_nonneg(self, S_sparse, U, U_prev, H, H_prev, V, V_prev):
+        '''
+        Solving U with non-zero projected gradient.  
+        '''
+        Ushape = U.shape;
+        
+        
+        
+        def smoothF(x):
+            # from x to U;
+            U = x.reshape(Ushape, order = 'F');
+            
+        def proj(x):
+            
+            
+        pass;
+    
 ##################################################################################################
         
     @staticmethod
@@ -327,16 +349,18 @@ class HierLat(CFAlg):
         which are initialized in learn_simplex_proj. 
         '''
         # computing shared information.
+        Sh_Sv = S_H * S_V;
+        
         Objprod1 = np.trace((S_sparse.T * S_sparse).todense());
-        Objprod2 = 2*np.trace(S_sparse.T*S_U*S_H*S_V);
-        Objprod3 = np.trace(S_V.T*S_H.T*(S_U.T*S_U)*(S_H*S_V));
+        Objprod2 = 2*np.trace(S_sparse.T*S_U* Sh_Sv);
+        Objprod3 = np.trace( Sh_Sv.T *(S_U.T*S_U)*Sh_Sv);
         Objprod = Objprod1 + Objprod2 + Objprod3; 
         
         Objprod4 = S_sparse.T*U*H;
-        Objprod5 = S_V.T*S_H.T*(S_U.T*U)*H;
+        Objprod5 = Sh_Sv.T * (S_U.T*U)*H;
         Objprod6 = H.T*U.T*U*H;
          
-        df_prod1 = H.T*U.T*S_U*S_H*S_V; 
+        df_prod1 = H.T*U.T*S_U*Sh_Sv; 
         df_prod2 = (U*H).T*S_sparse;
         df_prod3 = (U*H).T*U*H;    
         
@@ -413,38 +437,30 @@ class HierLat(CFAlg):
         Inv = np.linalg.inv(H.T*(U.T*U)*H + lamb*I);
         V_out = (Inv*H.T)*(U.T*U_prev)*(H_prev*V_prev) + Inv*H.T*(U.T*S_sparse);
         V_out = scipy.sparse.coo_matrix(V_out); 
-        ######################
-        # Projection (eliminate the non-zero entries)
-        ######################
-#         NZrow = V.row;
-#         NZcol = V.col;
-#         # print NZrow;
-#         # print NZcol;
-#         Val = [V_out[i,j] for (i,j) in zip(NZrow, NZcol)];
-#         # print Val;
-#         V_out = scipy.sparse.coo_matrix((Val,(NZrow,NZcol)),shape = (g,V.shape[1]));
-#         # print V_out;
-        return V_out;
-    
-##################################################################################################    
+        return V_out;    
     
     @staticmethod
     def learnS (S_sparse,U,H,V,feedback_data):
         # learning S with projection 
+        
         val = feedback_data.data_val;
         idx = zip(S_sparse.row.tolist(),S_sparse.col.tolist());
-        # idx = zip(feedback_data.data_row,feedback_data.data_col);
         HV = H*V;
+        
         sparse_val = [float(U[i,:]*HV[:,j]) for i,j in idx];
         # check if the size of sparse_val equals to the size of data value at the utility matrix
         if len(sparse_val) != len(val):
             print "The length of computed value is not matching the number of non-zero entry in X."
-            raise ValueError()    
-        temp = np.matrix(val) - np.matrix(sparse_val);
-        temp2 = temp.tolist();
-        temp3 = temp2[0];
-        temp3 = np.array(temp3);
-        S_sparse.data = temp3;
+            raise ValueError()
+        
+        #temp = np.matrix(val) - np.matrix(sparse_val);
+        #temp2 = temp.tolist();
+        #temp3 = temp2[0];
+        #temp3 = np.array(temp3);
+        #S_sparse.data = temp3;
+        S_sparse.data = np.array(val) - np.array(sparse_val); 
+        
+        
         return S_sparse;
       
     def learn_simplex_proj (self, S_sparse,U,H,V,X):
