@@ -64,14 +64,17 @@ class Opt_SpaRSA(ProxOptimizer):
         
         Parameters
         ----------
-        smoothF:    function value and graidnet of the smooth part. 
-        nonsmoothF: function value and proximal gradient of the non-smooth part.
+        @param smoothF:    function value and graidnet of the smooth part. 
+        @param nonsmoothF: function value and proximal gradient of the non-smooth part.
                     See proximal in rs.algorithms.optimization.optimizer
-        x:          starting point.
+        @param x:          starting point.
+        
+        @attention: x and nonsmoothF must be a column vector, or a one dimensional 
+                    ndarray. 
         
         Returns
         ----------
-        out = [x, f_x, output]
+        @return: out = [x, f_x, output]
         x:      the optimal solution
         f_x:    the function value of the optimal solution. 
         output: solver information. 
@@ -132,11 +135,11 @@ class Opt_SpaRSA(ProxOptimizer):
                 s = x - x_old;
                 y = grad_g_x - grad_f_old;
                 
-                if isinstance(x, np.ndarray):
-                    BBstep = np.dot(y, s) / np.dot(y, y);
-                elif isinstance(x, np.matrix):
+                if isinstance(x, np.matrix):
                     BBstep = (y.T * s)/(y.T * y);
                     BBstep = BBstep[0,0];
+                elif isinstance(x, np.ndarray):
+                    BBstep = np.dot(y, s) / np.dot(y, y);
                 else:
                     raise ValueError('Unknown data structure: ', str(type(x)));
                     

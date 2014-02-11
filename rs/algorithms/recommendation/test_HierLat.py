@@ -20,7 +20,9 @@ if __name__ == '__main__':
     
     
     filename = "/Users/jiayu.zhou/Data/duid-program-watchTime-genre/20131209/part-r-00000";
-    feedback_data = reader.read_file_with_minval(filename, 25, 300);
+    #feedback_data = reader.read_file_with_minval(filename, 25, 300);
+    feedback_data = reader.read_file_with_minval(filename, 35, 300);
+    
     print feedback_data;
     
     print 'Maximum Genre.'
@@ -32,7 +34,7 @@ if __name__ == '__main__':
     # build model with 3 latent factors.
     r = 5;
     # the L_2 norm regularizer 
-    lamb = 0.2; 
+    lamb = 0.001; 
     # the stopping delta value 
     delta = 0.01;
     # the maximum iteration number

@@ -27,7 +27,7 @@ if __name__ == '__main__':
                 [1.7, 1.8, 1.9, 2.0]])
     y = np.mat([[-0.1], [-0.2], [0], [+ 0.1], [+0.2]]);
     
-    lamb = 0;
+    lamb = 0.1;
     
     smoothF = lambda w: least_squares(w, X, y);
     nonsmoothF = prox_l1(lamb);

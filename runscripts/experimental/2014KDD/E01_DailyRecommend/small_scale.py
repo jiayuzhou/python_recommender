@@ -7,6 +7,7 @@ Created on Feb 3, 2014
 from rs.experiments.dwt_rec import experiment_rand_split;
 from rs.algorithms.recommendation.LMaFit import LMaFit;
 from rs.algorithms.recommendation.RandUV import RandUV;
+from rs.algorithms.recommendation.HierLat import HierLat
 
 
 if __name__ == '__main__':
@@ -25,7 +26,7 @@ if __name__ == '__main__':
     total_iteration = 3;
     
     # recommendation algorithms 
-    method_list = [ LMaFit(latent_factor = 2), RandUV(latent_factor = 2)  ]
+    method_list = [ LMaFit(latent_factor = 2), RandUV(latent_factor = 2), HierLat(latent_factor = 2)  ];
     
     # main method. 
     result = experiment_rand_split(exp_name, daily_data_file, min_occ_user, min_occ_prog, \
