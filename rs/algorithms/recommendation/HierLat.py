@@ -37,7 +37,7 @@ class HierLat(CFAlg):
     
 ##################################################################################################
 
-    def __init__(self, latent_factor = 20, lamb = 1e-3, stop_delta = 1e-4, maxiter = 1e3, verbose = False):
+    def __init__(self, latent_factor = 20, lamb = 1e-3, stop_delta = 1e-4, maxiter = 1e2, verbose = False):
         '''
         Constructor
         '''
@@ -415,18 +415,18 @@ class HierLat(CFAlg):
             # print counter
             counter += 1;
             print "Iteration: ", counter;
-            print "[Iter:" + counter + "] Update U with non-negative projection..."
+            print "[Iter:" + str(counter) + "] Update U with non-negative projection..."
             #U = HierLat.learnU(S_sparse,U,U_prev,H,H_prev,V,V_prev, self.lamb);    
             U = self.learnU_nonneg(S_sparse, U, U_prev, H, H_prev, V, V_prev);
             
-            print "[Iter:" + counter + "] Update H with non-negative projection..."
+            print "[Iter:" + str(counter) + "] Update H with non-negative projection..."
             #H = HierLat.learnH(S_sparse,U,U_prev,H,H_prev,V,V_prev);
             H = self.learnH_nonneg(S_sparse, U, U_prev, H, H_prev, V, V_prev);    
             
-            print "[Iter:" + counter + "] Update V with prob. simplex projection..."
+            print "[Iter:" + str(counter) + "] Update V with prob. simplex projection..."
             V = self.learnV_simplex (S_sparse,U,U_prev,H,H_prev,V,V_prev); 
             
-            print "[Iter:" + counter + "] Update S..."
+            print "[Iter:" + str(counter) + "] Update S..."
             S_sparse = HierLat.learnS(S_sparse,U,H,V,X);
     
             # calculate the objective function 

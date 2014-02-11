@@ -96,7 +96,7 @@ class LMaFit(CFAlg):
     '''
     ALG_NAME = 'LMaFit';
 
-    def __init__(self, latent_factor = 20, lamb = 1e-3, stop_delta = 1e-4, maxiter = 1e3, verbose = False):
+    def __init__(self, latent_factor = 20, lamb = 1e-3, stop_delta = 1e-4, maxiter = 1e2, verbose = False):
         '''
         Constructor
         '''

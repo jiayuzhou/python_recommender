@@ -16,7 +16,7 @@ def rmse(list1, list2):
     if not len(list1) == len(list2):
         raise ValueError('Dimension not match.');
     
-    return (sum( (x - y) ** 2 for x, y in izip(list1, list2))) ** 0.5;
+    return (sum( (x - y) ** 2 for x, y in izip(list1, list2)) / len(list1) ) ** 0.5;
 
 
 def hit_prec(hit_status):
