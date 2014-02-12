@@ -27,12 +27,12 @@ if __name__ == '__main__':
     exp_name = 'test_exp_mid_prec_rec'; # something meaningful. 
     
     # filtering criteria
-    min_occ_user = 4;
-    min_occ_prog = 1;
+    min_occ_user = 35;
+    min_occ_prog = 300;
     
-    top_n = 10; # performance computed on top N; 
+    top_n = 50; # performance computed on top N; 
     
-    leave_k_out = 1; # perform leave k out. 
+    leave_k_out = 10; # perform leave k out. 
     
     # number of repetitions. 
     total_iteration = 3;
