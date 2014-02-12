@@ -19,7 +19,7 @@ if __name__ == '__main__':
     min_occ_user = 35;
     min_occ_prog = 300;
     
-    top_n = 10; # performance computed on top N; 
+    top_n = 20; # performance computed on top N; 
     
     leave_k_out = 10; # perform leave k out. 
     
