@@ -22,8 +22,7 @@ if __name__ == '__main__':
         
     print 'processing file', daily_data_file;
     if not os.path.isfile(daily_data_file):
-        print 'Cannot find data file. ';
-        return;
+        raise ValueError('Cannot find data file. ');
     
     exp_name = 'test_exp_mid_prec_rec'; # something meaningful. 
     
