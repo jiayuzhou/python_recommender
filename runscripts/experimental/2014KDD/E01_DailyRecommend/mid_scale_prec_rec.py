@@ -3,7 +3,8 @@ Created on Feb 3, 2014
 
 @author: jiayu.zhou
 '''
-
+import sys;
+import os;
 from rs.experiments.dwt_rec_leave_N_out import experiment_leave_k_out;
 from rs.algorithms.recommendation.LMaFit import LMaFit;
 from rs.algorithms.recommendation.RandUV import RandUV;
@@ -13,7 +14,18 @@ from rs.algorithms.recommendation.HierLat import HierLat
 if __name__ == '__main__':
     daily_data_file = "../../../../datasample/agg_duid_pid_watchtime_genre/20131209_100000";
     
-    exp_name = 'test_exp'; # something meaningful. 
+    
+    if len(sys.argv) == 1:
+        print 'Use default sample data.'
+    else:
+        daily_data_file = sys.argv[1];
+        
+    print 'processing file', daily_data_file;
+    if not os.path.isfile(daily_data_file):
+        print 'Cannot find data file. ';
+        return;
+    
+    exp_name = 'test_exp_mid_prec_rec'; # something meaningful. 
     
     # filtering criteria
     min_occ_user = 4;
