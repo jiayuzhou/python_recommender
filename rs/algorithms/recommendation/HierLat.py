@@ -151,8 +151,6 @@ class HierLat(CFAlg):
         __________
         return a list of results (predicted values) at specified locations.   
         '''
-        
-        #TODO: MODIFY THE PREDICTION.
         if not (len(row_idx_arr) == len(col_idx_arr)):
             raise ValueError("The col/row indices of the location should be the same.");
         

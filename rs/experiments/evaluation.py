@@ -26,3 +26,25 @@ def hit_prec(hit_status):
     '''
     
     return sum( x > 0 for x in hit_status ) / float(len(hit_status));
+
+def precision_itemlist(pred_list, hit_item_list):
+    a = set(pred_list);
+    b = set(hit_item_list);
+    # nan case. 
+    if len(a) == 0:
+        return 0;
+    
+    return len(a & b)/float(len(a))
+
+def recall_itemlist(pred_list, hit_item_list):
+    a = set(pred_list);
+    b = set(hit_item_list);
+    if len(b) == 0:
+        return 0;
+    
+    return len(a & b)/float(len(b))
+    
+
+
+
+

@@ -104,17 +104,19 @@ def leave_k_out(feedback_data, leave_k_out):
     # compute the non-zero elements for each row and randomly pick k out. 
     for i in range(smat.shape[0]):
         
+        col_pos_arr = np.nonzero(smat[i, :])[1];
         # for each row slice compute the nnz. 
-        nnzi = len(np.nonzero(smat[i, :])[1]);
+        nnzi = len(col_pos_arr);
         
         # safeguard.
         kk = max(0, min(nnzi - 1, leave_k_out)); # at least one element.
         
         idx = range(nnzi);  
-        random.shuffle(idx);            # random permutation.
+        random.shuffle(idx);   # random permutation.
         sel_idx = idx[:kk];    # take random rows.
         
-        leave_ind[i] = sel_idx;
+        #leave_ind[i] = sel_idx;
+        leave_ind[i] = set(col_pos_arr[sel_idx]);
         
     return leave_ind;
 
