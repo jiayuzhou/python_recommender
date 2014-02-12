@@ -7,6 +7,7 @@ Created on Feb 1, 2014
 '''
 
 import random;
+import numpy as np;
 
 def sample_num(data_size, sel_num):
     '''
@@ -81,5 +82,39 @@ def fold(data_size, fold_num, total_fold):
     if fold_num >= total_fold:
         raise ValueError("Fold number should be <= total_fold - 1");
     return range(data_size)[fold_num::total_fold];
+
+def leave_k_out(feedback_data, leave_k_out):
+    '''
+    leave k items out for each user. This code compute the items to be left out.  
     
-    pass;
+    Parameters
+    ----------
+    @param feedback_data: the feedback data to be performed leave k out.
+    @param leave_k_out:   the number of items to be left out. 
+    
+    Returns
+    ---------- 
+    @return leave_ind: an indexed dictionary, indices of the k left for each row. 
+    '''
+    
+    leave_ind = {};
+    
+    smat = feedback_data.get_sparse_matrix().tocsr();
+    
+    # compute the non-zero elements for each row and randomly pick k out. 
+    for i in range(smat.shape[0]):
+        
+        # for each row slice compute the nnz. 
+        nnzi = len(np.nonzero(smat[i, :])[1]);
+        
+        # safeguard.
+        kk = max(0, min(nnzi - 1, leave_k_out)); # at least one element.
+        
+        idx = range(nnzi);  
+        random.shuffle(idx);            # random permutation.
+        sel_idx = idx[:kk];    # take random rows.
+        
+        leave_ind[i] = sel_idx;
+        
+    return leave_ind;
+
