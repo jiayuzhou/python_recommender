@@ -54,7 +54,7 @@ if __name__ == '__main__':
     
     # main method. 
     result = experiment_leave_k_out(exp_name, daily_data_file, min_occ_user, min_occ_prog, \
-                method_list,  leave_k_out, total_iteration, top_n);
+                method_list,  leave_k_out, total_iteration, top_n, True);
     
     # display results (average RMSE). 
     for method_name, method_iter_perf in result.items():
