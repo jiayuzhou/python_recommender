@@ -159,7 +159,7 @@ class LMaFit(CFAlg):
         self.S_sparse = S_sparse;
         
         if self.verbose:
-            mcpl_log('dummy algorithm trained.');
+            mcpl_log('LMaFit algorithm trained.');
     
     def predict(self, row_idx_arr, col_idx_arr):
         '''

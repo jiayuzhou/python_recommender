@@ -9,17 +9,25 @@ from rs.experiments.dwt_rec_leave_N_out import experiment_leave_k_out;
 from rs.algorithms.recommendation.LMaFit import LMaFit;
 from rs.algorithms.recommendation.RandUV import RandUV;
 from rs.algorithms.recommendation.HierLat import HierLat
+from rs.algorithms.recommendation import NMF
 
 
 if __name__ == '__main__':
     daily_data_file = "../../../../datasample/agg_duid_pid_watchtime_genre/20131209_100000";
-    
+    lafactor = 2; 
     
     if len(sys.argv) == 1:
         print 'Use default sample data.'
     else:
         daily_data_file = sys.argv[1];
         
+    if len(sys.argv) <= 2:
+        print 'Use default latent factor.'
+    else:
+        lafactor = int(sys.argv[2]);
+        
+    print 'latent factor', lafactor;
+    
     print 'processing file', daily_data_file;
     if not os.path.isfile(daily_data_file):
         raise ValueError('Cannot find data file. ');
@@ -38,7 +46,8 @@ if __name__ == '__main__':
     total_iteration = 3;
     
     # recommendation algorithms 
-    method_list = [ LMaFit(latent_factor = 2), RandUV(latent_factor = 2), HierLat(latent_factor = 2)  ];
+    method_list = [ LMaFit (latent_factor = lafactor), RandUV (latent_factor = lafactor), \
+                   HierLat (latent_factor = lafactor), NMF    (latent_factor = lafactor)  ];
     
     # main method. 
     result = experiment_leave_k_out(exp_name, daily_data_file, min_occ_user, min_occ_prog, \
