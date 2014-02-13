@@ -8,6 +8,7 @@ import numpy as np;
 from sklearn import decomposition
 from rs.algorithms.recommendation.generic_recalg import CFAlg
 from rs.utils.log import Logger; 
+from rs.data.daily_watchtime import DailyWatchTimeReader
 
 mcpl_log = lambda message: Logger.Log(NMF.ALG_NAME + ':'+message, Logger.MSG_CATEGORY_ALGO);
 
@@ -30,8 +31,9 @@ class NMF(CFAlg):
         self.stop_delta    = stop_delta; 
         self.verbose       = verbose;
         
-        self.nmf_solver    = decomposition.NMF(n_components=self.latent_factor, \
-                            beta = self.beta, eta = self.eta, tol = self.stop_delta, max_iter = self.maxiter );
+        self.nmf_solver    = decomposition.ProjectedGradientNMF(n_components=self.latent_factor, \
+                            beta = self.beta, eta = self.eta, tol = self.stop_delta, max_iter = self.maxiter, \
+                            init='random', random_state = 0 );
         
         mcpl_log('NMF instance created: latent factor ' + str(self.latent_factor));
         
@@ -88,4 +90,19 @@ class NMF(CFAlg):
             mcpl_log('predicted ' + str(len(row_idx_arr)) + ' elements.');
         
         return result;
+    
+    
+if __name__ == '__main__':
+    filename = "../../../datasample/agg_duid_pid_watchtime_genre/20131209_100000";
+    
+    # load data. 
+    reader = DailyWatchTimeReader();  
+    feedback_data = reader.read_file_with_minval(filename, 1, 1);
+    feedback_data.normalize_row();
+    
+    # build model with 3 latent factors.
+    r = 5;
+    
+    NMF_model = NMF(latent_factor = 2);
+    NMF_model.train(feedback_data);
         
