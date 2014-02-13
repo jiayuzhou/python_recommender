@@ -9,7 +9,7 @@ from rs.experiments.dwt_rec_leave_N_out import experiment_leave_k_out;
 from rs.algorithms.recommendation.LMaFit import LMaFit;
 from rs.algorithms.recommendation.RandUV import RandUV;
 from rs.algorithms.recommendation.HierLat import HierLat
-from rs.algorithms.recommendation import NMF
+from rs.algorithms.recommendation.NMF import NMF
 
 
 if __name__ == '__main__':
@@ -46,8 +46,8 @@ if __name__ == '__main__':
     total_iteration = 3;
     
     # recommendation algorithms 
-    method_list = [ LMaFit (latent_factor = lafactor), RandUV (latent_factor = lafactor), \
-                   HierLat (latent_factor = lafactor), NMF    (latent_factor = lafactor)  ];
+    method_list = [ LMaFit(latent_factor=lafactor), RandUV(latent_factor=lafactor), \
+                   HierLat(latent_factor=lafactor), NMF(latent_factor=lafactor)  ];
     
     # main method. 
     result = experiment_leave_k_out(exp_name, daily_data_file, min_occ_user, min_occ_prog, \
