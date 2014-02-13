@@ -9,8 +9,8 @@ import numpy as np;
 from rs.algorithms.recommendation.generic_recalg import CFAlg;
 from rs.utils.log import Logger; 
 import scipy.sparse;
-import scipy.linalg
-
+import scipy.linalg;
+from rs.algorithms.recommendation.ProbabilisticMatrixFactorization import *;
 
 
 # an encapsulated logger.  
@@ -51,54 +51,44 @@ class PMF(CFAlg):
         if self.verbose:
             log('training dummy algorithm.');
         
-        # load the meta data including the genre information to properly store them 
-        meta = feedback_data.meta;
-#        row_mapping = feedback_data.row_mapping;
-#        col_mapping = feedback_data.col_mapping;
-        
         m = feedback_data.num_row;
         n = feedback_data.num_col;  
         r = self.latent_factor;
-        g = 330;
-        #print meta
-        #print type(meta['pggr_pg']);
-        #print type(meta['pggr_gr']);
-        if len(meta['pggr_pg']) != len(meta['pggr_gr']):
-            raise ValueError("The length of the meta data mismatched.")
-        V_val = [1 for i in range(len(meta['pggr_pg']))];
-        # print V_val 
-            
         lamb = self.lamb;
         delta = self.delta;
         maxiter = self.maxiter;
-                
+        
         self.row = m;
         self.col = n;
         
-        # U, H, V should be stored in numpy.matrix form. 
-        # initialization of U, H, V and S_sparse
-        U = np.matrix(np.random.rand(m, r));
-        H = np.matrix(np.random.rand(r,g));
-        V = scipy.sparse.coo_matrix((V_val,(meta['pggr_gr'],meta['pggr_pg'])),shape = (g,n));
-        # print V.shape
-        # print V     
-        S_sparse = scipy.sparse.coo_matrix((np.array(feedback_data.data_val,dtype = np.float64),(feedback_data.data_row,feedback_data.data_col)),(m,n));
-        # S_sparse = S_sparse.tolil();
-        # print S_sparse.row
+        # U, V should be stored in numpy.matrix form. 
+        # initialization of U, V and S_sparse
+        
+        # U = np.matrix(np.random.rand(m, r));
+        # V = np.matrix(np.random.rand(r,n));   
+        
+        feedback_data.normalize_row();     
+        # S_sparse = scipy.sparse.coo_matrix((np.array(feedback_data.data_val,dtype = np.float64),(feedback_data.data_row,feedback_data.data_col)),(m,n));    
+        
+        ratings = [];
+        ratings =  zip(feedback_data.data_row,feedback_data.data_col, feedback_data.data_val);
+        
+        pmf = ProbabilisticMatrixFactorization(ratings, latent_d=r);
+        liks = []
+        
+        counter = 0;
+        while (pmf.update() and counter<maxiter):
+            counter += 1;
+            print 'Iteration: ', counter;
+            lik = pmf.likelihood()
+            liks.append(lik)
+            print "L=", lik
+            pass
+        
+    
+        self.U = np.matrix(pmf.users);
+        self.V = np.matrix((pmf.items).T);
 
-        ###############################
-        # the main learning process
-        # U = PMF.CGF_learnU (S_sparse,U,U,H,H,V,V,lamb);
-        # H = PMF.CGF_learnH (S_sparse,U,U,H,H,V,V);
-        # V = PMF.CGF_learnV (S_sparse,U,U,H,H,V,V,lamb);
-        # S_sparse = PMF.CGF_learnS (S_sparse,U,H,V,feedback_data);
-        
-        [U,H,V,S_sparse] = PMF.Learn (S_sparse,U,H,V,feedback_data,lamb,delta,maxiter);
-        
-        self.U = U;
-        self.H = H;
-        self.V = V;
-        self.S_sparse = S_sparse;
         
         if self.verbose:
             log('dummy algorithm trained.');
