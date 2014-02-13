@@ -96,7 +96,7 @@ class LMaFit(CFAlg):
     '''
     ALG_NAME = 'LMaFit';
 
-    def __init__(self, latent_factor = 20, lamb = 1e-3, stop_delta = 1e-4, maxiter = 1e3, verbose = False):
+    def __init__(self, latent_factor = 20, lamb = 1e-3, stop_delta = 1e-4, maxiter = 1e2, verbose = False):
         '''
         Constructor
         '''
@@ -159,7 +159,7 @@ class LMaFit(CFAlg):
         self.S_sparse = S_sparse;
         
         if self.verbose:
-            mcpl_log('dummy algorithm trained.');
+            mcpl_log('LMaFit algorithm trained.');
     
     def predict(self, row_idx_arr, col_idx_arr):
         '''

@@ -6,7 +6,8 @@ Created on Jan 28, 2014
 
 from rs.data.generic_data import GenericData;
 from rs.utils.sparse_matrix import normalize_row;
-from scipy.sparse import coo_matrix;
+from scipy.sparse import coo_matrix, csr_matrix;
+import numpy as np;
 import random #@UnusedImport
 import rs.data.data_split as ds;
 
@@ -67,6 +68,78 @@ class FeedbackData(GenericData):
         self.data_row = mat.row.tolist();
         self.data_col = mat.col.tolist();
         
+    def leave_k_out(self, leave_k_out_idx):
+        '''
+        Construct leave-k-out dataset (and remaining). 
+        See test_recdata_leavekout.py for example. 
+        '''
+        
+        # get the sparse matrix. 
+        smat = self.get_sparse_matrix().tocsr();
+        
+        # matrix size: self.num_col; self.num_row;
+        
+        tr_data    = [];
+        tr_indices = [];
+        tr_indptr  = [];
+        
+        lo_data    = [];
+        lo_indices = [];
+        lo_indptr  = [];
+        
+        # 
+        tr_idx = 0;
+        lo_idx = 0;
+        
+        tr_indptr.append(tr_idx);
+        lo_indptr.append(lo_idx);
+        
+        for row_pos in range(self.num_row):
+            row_leave_idx = leave_k_out_idx[row_pos];
+            
+            # col_pos_idx is in range [range(smat.indptr[row_pos], smat.indptr[row_pos + 1]]
+            # and the indices in 
+            # Access data at col_pos_idx.   smat.data    [col_pos_idx];
+            # Access column index:          smat.indices [col_pos_idx];
+            for col_pos_idx in range(smat.indptr[row_pos], smat.indptr[row_pos + 1]):
+                
+                col_pos = smat.indices[col_pos_idx]; # the column position. 
+                
+                if col_pos in row_leave_idx:
+                    lo_data.append   (smat.data[col_pos_idx]);
+                    lo_indices.append(col_pos);
+                    lo_idx += 1;
+                else:
+                    tr_data.append   (smat.data[col_pos_idx]);
+                    tr_indices.append(col_pos);
+                    tr_idx += 1;
+                
+            lo_indptr.append(lo_idx);
+            tr_indptr.append(tr_idx);
+            # end for each column.
+        # end for each row. 
+        
+        lo_data    = np.array(lo_data);
+        lo_indices = np.array(lo_indices);
+        lo_indptr  = np.array(lo_indptr);
+        
+        tr_data    = np.array(tr_data);
+        tr_indices = np.array(tr_indices);
+        tr_indptr  = np.array(tr_indptr);
+        
+        # construct left out feedback dataset. 
+        lo_data   = csr_matrix( (lo_data,lo_indices,lo_indptr), shape=(self.num_row, self.num_col)).tocoo()
+        lo_fbdata = FeedbackData(lo_data.row.tolist(), lo_data.col.tolist(), lo_data.data.tolist(),\
+                                  self.num_row, self.num_col, self.row_mapping, self.col_mapping, self.meta);  
+        
+        # construct remaining feedback dataset.
+        tr_data   = csr_matrix( (tr_data,tr_indices,tr_indptr), shape=(self.num_row, self.num_col)).tocoo()
+        tr_fbdata = FeedbackData(tr_data.row.tolist(), tr_data.col.tolist(), tr_data.data.tolist(),\
+                                  self.num_row, self.num_col, self.row_mapping, self.col_mapping, self.meta);
+        
+        return [lo_fbdata, tr_fbdata];
+        
+    
     def subdata_row(self, sel_idx):
         '''
         select a set of rows (users) to form a new dataset.  
