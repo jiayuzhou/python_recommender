@@ -49,7 +49,13 @@ class FeedbackData(GenericData):
         mat = coo_matrix((self.data_val, (self.data_row, self.data_col)), \
                      shape = (self.num_row, self.num_col));
         return mat;
-        
+    
+    def binarize(self):
+        '''
+        Change all to one. 
+        '''
+        self.data_val = [1] * len(self.data_val); 
+    
     def normalize_row(self):
         '''
         Perform a normalization on the row. This will modify the row/col/val.

@@ -12,7 +12,7 @@ import rs.data.data_split as ds;
 import numpy as np;
 
 def experiment_leave_k_out(exp_name, daily_data_file, min_occ_user, min_occ_prog, \
-                           method_list, leave_k_out, total_iteration, top_n):
+                           method_list, leave_k_out, total_iteration, top_n, binary = False):
     '''
     
     Parameters
@@ -25,6 +25,7 @@ def experiment_leave_k_out(exp_name, daily_data_file, min_occ_user, min_occ_prog
     @param leave_k_out: leave k out for each user. The k must be strict less than
          min_occ_user
     
+    @param binary: if this is set to true then the binary data is used (non-zero set to 1). 
     
     Returns
     ----------
@@ -38,7 +39,11 @@ def experiment_leave_k_out(exp_name, daily_data_file, min_occ_user, min_occ_prog
     lko_log = lambda msg: Logger.Log(msg, Logger.MSG_CATEGORY_EXP);
     
     # construct exp_id
-    exp_id = 'lko_' + exp_name + '_data' +str(hash(daily_data_file)) + '_mu' + str(min_occ_user) + '_mp' + str(min_occ_prog) \
+    if binary:
+        exp_id = 'lko_bi_' + exp_name + '_data' +str(hash(daily_data_file)) + '_mu' + str(min_occ_user) + '_mp' + str(min_occ_prog) \
+                      + '_k' + str(leave_k_out) + '_toiter' + str(total_iteration);
+    else:
+        exp_id = 'lko_' + exp_name + '_data' +str(hash(daily_data_file)) + '_mu' + str(min_occ_user) + '_mp' + str(min_occ_prog) \
                       + '_k' + str(leave_k_out) + '_toiter' + str(total_iteration);
     lko_log('Experiment ID: ' + exp_id);
     
@@ -48,9 +53,13 @@ def experiment_leave_k_out(exp_name, daily_data_file, min_occ_user, min_occ_prog
     data = reader.read_file_with_minval(daily_data_file, min_occ_user, min_occ_prog);
     lko_log('Data loaded: ' + str(data));
     
-    # normalize 
-    lko_log('Normalizing data...');
-    data.normalize_row();
+    if binary:
+        lko_log('Binarizing data...');
+        data.binarize();
+    else:
+        # normalize 
+        lko_log('Normalizing data...');
+        data.normalize_row();
     
     result = {};
     
