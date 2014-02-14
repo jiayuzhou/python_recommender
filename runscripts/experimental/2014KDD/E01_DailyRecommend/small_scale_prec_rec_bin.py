@@ -48,7 +48,7 @@ if __name__ == '__main__':
         min_occ_prog = 300;
         leave_k_out = 10; # perform leave k out.
     
-    top_n = 50; # performance computed on top N; 
+    top_n = 10; # performance computed on top N; 
     
      
     

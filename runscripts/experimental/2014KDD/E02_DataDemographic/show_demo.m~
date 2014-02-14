@@ -1,0 +1,8 @@
+clear; close all;
+
+daily_data_mat_file = '/Users/jiayu.zhou/Data/duid-program-watchTime-genre/20131209.mat';
+loaddata = load(daily_data_mat_file);
+
+
+disp('number of programs viewed by at least 10 ppl.')
+disp
