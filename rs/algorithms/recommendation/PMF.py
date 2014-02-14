@@ -21,7 +21,7 @@ log = lambda message: Logger.Log(PMF.ALG_NAME + ':'+message, Logger.MSG_CATEGORY
 
 class PMF(CFAlg):
     '''
-    A random guess recommender (demo).
+    The probabilistic matrix factorization (PMF) algorithm.  
     '''
     ALG_NAME = 'PMF';
     
@@ -38,7 +38,7 @@ class PMF(CFAlg):
         self.learn_rate = learning_rate;
         
         log('PMF algorithm instance created: latent factor ' + str(self.latent_factor));
-        
+         
         self.verbose = verbose;
     
     def unique_str(self):

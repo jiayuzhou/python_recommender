@@ -75,7 +75,8 @@ class TriUHV(CFAlg):
         m = feedback_data.num_row;
         n = feedback_data.num_col;  
         r = self.latent_factor;
-        g = 330;
+        g = max([330, np.max(meta['pggr_gr']) + 1]); 
+        
         #print meta
         #print type(meta['pggr_pg']);
         #print type(meta['pggr_gr']);

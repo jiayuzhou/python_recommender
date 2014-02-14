@@ -16,7 +16,14 @@ if __name__ == '__main__':
     
     data_mat = data.get_sparse_matrix();
     
-    sio.savemat("/Users/jiayu.zhou/Data/duid-program-watchTime-genre/20131209.mat", {'data': data_mat})
+    ### directory save sparse matrix data structure to Matlab. 
+    #sio.savemat("/Users/jiayu.zhou/Data/duid-program-watchTime-genre/20131209.mat", {'data': data_mat})
+    
+    ### 
+    sio.savemat("/Users/jiayu.zhou/Data/duid-program-watchTime-genre/20131209_sparse.mat", 
+                {'data': data_mat.data, 'i': data_mat.row, 'j': data_mat.col, \
+                 'm': data_mat.shape[0], 'n': data_mat.shape[1]});
+    
     
     print 'Done';
     
