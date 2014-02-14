@@ -37,9 +37,13 @@ class TriUHV(CFAlg):
         self.delta = stop_delta; 
         self.maxiter = maxiter;
         
-        log('dummy algorithm instance created: latent factor ' + str(self.latent_factor));
+        log('TriUHV algorithm instance created: latent factor ' + str(self.latent_factor));
         
         self.verbose = verbose;
+        
+    def unique_str(self):
+        return TriUHV.ALG_NAME + '_k' + str(self.latent_factor) + '_lamb' + str(self.lamb) \
+            + '_maxIter' + str(self.maxiter) + '_delta' + str(self.stop_delta);
         
 ##################################################################################################
         
