@@ -27,20 +27,24 @@ class PMF(CFAlg):
     
 ##################################################################################################
 
-    def __init__(self, latent_factor = 20, lamb = 1e-3, stop_delta = 1e-4, maxiter = 1e3, verbose = False):
+    def __init__(self, latent_factor = 20, lamb = 1e-3, learning_rate = 0.0001, maxiter = 1e3, verbose = False):
         '''
         Constructor
         '''
         # initialize parameters. 
         self.latent_factor = latent_factor;
         self.lamb = lamb;
-        self.delta = stop_delta; 
         self.maxiter = maxiter;
+        self.learn_rate = learning_rate;
         
-        log('dummy algorithm instance created: latent factor ' + str(self.latent_factor));
+        log('PMF algorithm instance created: latent factor ' + str(self.latent_factor));
         
         self.verbose = verbose;
-        
+    
+    def unique_str(self):
+        return PMF.ALG_NAME + '_k' + str(self.latent_factor) + '_lamb' + str(self.lamb)  \
+            + '_maxiter' + str(self.maxiter) + '_lr' + str(self.learn_rate);
+    
 ##################################################################################################
         
     def train(self, feedback_data):
@@ -54,8 +58,6 @@ class PMF(CFAlg):
         m = feedback_data.num_row;
         n = feedback_data.num_col;  
         r = self.latent_factor;
-        lamb = self.lamb;
-        delta = self.delta;
         maxiter = self.maxiter;
         
         self.row = m;
@@ -70,10 +72,11 @@ class PMF(CFAlg):
         feedback_data.normalize_row();     
         # S_sparse = scipy.sparse.coo_matrix((np.array(feedback_data.data_val,dtype = np.float64),(feedback_data.data_row,feedback_data.data_col)),(m,n));    
         
-        ratings = [];
         ratings =  zip(feedback_data.data_row,feedback_data.data_col, feedback_data.data_val);
         
-        pmf = ProbabilisticMatrixFactorization(ratings, latent_d=r);
+        pmf = ProbabilisticMatrixFactorization(ratings, latent_d=r, \
+                                lamb = self.lamb, learning_rate = self.learn_rate);
+                                
         liks = []
         
         counter = 0;

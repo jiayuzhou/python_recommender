@@ -26,6 +26,8 @@ if __name__ == '__main__':
     maxiter = 300;
      
     PMF_model = PMF(r,lamb,delta,maxiter, verbose = True);
+    print PMF_model.unique_str();
+    
     PMF_model.train(feedback_data);
     
     # test. 

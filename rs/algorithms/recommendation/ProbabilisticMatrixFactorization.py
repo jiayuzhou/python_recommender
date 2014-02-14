@@ -4,10 +4,10 @@ import numpy as np
 
 class ProbabilisticMatrixFactorization():
 
-    def __init__(self, rating_tuples, latent_d=1):
-        self.latent_d = latent_d
-        self.learning_rate = .0001
-        self.regularization_strength = 0.1
+    def __init__(self, rating_tuples, latent_d=1, lamb = 0.1, learning_rate = 0.0001):
+        self.latent_d = latent_d;
+        self.learning_rate = learning_rate;
+        self.regularization_strength = lamb;
         
         self.ratings = np.array(rating_tuples).astype(float)
         self.converged = False
