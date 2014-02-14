@@ -60,6 +60,10 @@ if __name__ == '__main__':
                    HierLat(latent_factor=lafactor), NMF(latent_factor=lafactor),
                    PMF(latent_factor=lafactor),     TriUHV(latent_factor=lafactor)  ];
     
+    
+    #method_list = [ NMF(latent_factor=lafactor),\
+    #               PMF(latent_factor=lafactor),     TriUHV(latent_factor=lafactor)  ];
+    
     # main method. 
     result = experiment_leave_k_out(exp_name, daily_data_file, min_occ_user, min_occ_prog, \
                 method_list,  leave_k_out, total_iteration, top_n, True);

@@ -27,7 +27,7 @@ class PMF(CFAlg):
     
 ##################################################################################################
 
-    def __init__(self, latent_factor = 20, lamb = 1e-3, learning_rate = 0.0001, maxiter = 1e3, verbose = False):
+    def __init__(self, latent_factor = 20, lamb = 1e-3, learning_rate = 0.0001, maxiter = 100, verbose = False):
         '''
         Constructor
         '''

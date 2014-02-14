@@ -27,7 +27,7 @@ class TriUHV(CFAlg):
     
 ##################################################################################################
 
-    def __init__(self, latent_factor = 20, lamb = 1e-3, stop_delta = 1e-4, maxiter = 1e3, verbose = False):
+    def __init__(self, latent_factor = 20, lamb = 1e-3, stop_delta = 1e-4, maxiter = 100, verbose = False):
         '''
         Constructor
         '''
@@ -43,7 +43,7 @@ class TriUHV(CFAlg):
         
     def unique_str(self):
         return TriUHV.ALG_NAME + '_k' + str(self.latent_factor) + '_lamb' + str(self.lamb) \
-            + '_maxIter' + str(self.maxiter) + '_delta' + str(self.stop_delta);
+            + '_maxIter' + str(self.maxiter) + '_delta' + str(self.delta);
         
 ##################################################################################################
         
@@ -81,7 +81,7 @@ class TriUHV(CFAlg):
         #print type(meta['pggr_gr']);
         if len(meta['pggr_pg']) != len(meta['pggr_gr']):
             raise ValueError("The length of the meta data mismatched.")
-        V_val = [1 for i in range(len(meta['pggr_pg']))];
+        V_val = [1 for i in range(len(meta['pggr_pg']))]; #@UnusedVariable
         # print V_val 
             
         lamb = self.lamb;
@@ -114,6 +114,7 @@ class TriUHV(CFAlg):
         self.U = U;
         self.H = H;
         self.V = V;
+        self.HV = self.H * self.V;
         self.S_sparse = S_sparse;
         
         if self.verbose:
@@ -139,7 +140,7 @@ class TriUHV(CFAlg):
         if not (len(row_idx_arr) == len(col_idx_arr)):
             raise ValueError("The col/row indices of the location should be the same.");
         
-        result =  [ (self.U[row, :] * self.V[:, col])[0,0].tolist() for (row, col) in zip(row_idx_arr, col_idx_arr) ];
+        result =  [ (self.U[row, :] * self.HV[:, col])[0,0].tolist() for (row, col) in zip(row_idx_arr, col_idx_arr) ];
         if self.verbose:
             log('predicted ' + str(len(row_idx_arr)) + ' elements.');
         
@@ -166,8 +167,8 @@ class TriUHV(CFAlg):
     @staticmethod
     def CGF_learnH (S_sparse,U,U_prev,H,H_prev,V,V_prev):
         # fix the variable S and U, V and solve for H
-        r = U.shape[1];
-        g = V.shape[0];
+        #r = U.shape[1];
+        #g = V.shape[0];
         Inv1 = np.linalg.pinv(U.T*U); # An rxr matrix
         Inv2 = np.linalg.pinv((V*V.T).todense());  # An gxg matrix
         H_out = Inv1*(U.T*U_prev)*H_prev*(V_prev*V.T)*Inv2 + Inv1*((U.T*S_sparse)*V.T)*Inv2;

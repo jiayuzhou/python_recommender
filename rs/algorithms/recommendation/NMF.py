@@ -20,7 +20,7 @@ class NMF(CFAlg):
     ALG_NAME = 'NMF';
 
     def __init__(self, latent_factor = 20, beta = 1, eta = 0.1, \
-                 maxiter = 200, stop_delta = 0.0001, verbose = False):
+                 maxiter = 100, stop_delta = 0.0001, verbose = False):
         '''
         Constructor
         '''
