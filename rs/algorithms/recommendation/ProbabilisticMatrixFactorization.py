@@ -68,6 +68,9 @@ class ProbabilisticMatrixFactorization():
             elif len(rating_tuple) == 4:
                 (i, j, rating, weight) = rating_tuple
             
+            i = int(i);
+            j = int(j);
+            
             r_hat = np.sum(self.users[i] * self.items[j])
             
             for d in range(self.latent_d):
