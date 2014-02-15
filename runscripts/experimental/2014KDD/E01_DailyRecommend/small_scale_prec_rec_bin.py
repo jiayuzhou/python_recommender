@@ -42,11 +42,11 @@ if __name__ == '__main__':
     if use_default_data:
         min_occ_user = 2;
         min_occ_prog = 4;
-        leave_k_out = 1; # perform leave k out.
+        leave_k_out  = 1; # perform leave k out.
     else:
         min_occ_user = 35;
         min_occ_prog = 300;
-        leave_k_out = 10; # perform leave k out.
+        leave_k_out  = 10; # perform leave k out.
     
     top_n = 10; # performance computed on top N; 
     

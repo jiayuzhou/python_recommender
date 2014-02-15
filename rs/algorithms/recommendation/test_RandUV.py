@@ -27,4 +27,16 @@ if __name__ == '__main__':
     print 'Prediction:'
     print rand_model.predict(loc_row, loc_col);
     
+    # test row. 
+    loc_row = [200, 4, 105];
+    loc_col = [[10], [22], [4]];
+    print 'Prediction:'
+    print rand_model.predict_row(loc_row[0], loc_col[0]);
+    print rand_model.predict_row(loc_row[1], loc_col[1]);
+    print rand_model.predict_row(loc_row[2], loc_col[2]);
     
+    print rand_model.predict_row(105, range(0,10));
+    
+    UV = rand_model.U * rand_model.V;
+    
+    print UV[105, range(0,10)];

@@ -48,11 +48,11 @@ if __name__ == '__main__':
     total_iteration = 3;
     
     # recommendation algorithms 
-#     method_list = [ LMaFit(latent_factor=lafactor), RandUV(latent_factor=lafactor), \
-#                    HierLat(latent_factor=lafactor), NMF(latent_factor=lafactor),
-#                    PMF(latent_factor=lafactor),     TriUHV(latent_factor=lafactor)  ];
+    method_list = [ LMaFit(latent_factor=lafactor), RandUV(latent_factor=lafactor), \
+                    HierLat(latent_factor=lafactor), NMF(latent_factor=lafactor),
+                    PMF(latent_factor=lafactor),     TriUHV(latent_factor=lafactor)  ];
                    
-    method_list = [ PMF(latent_factor=lafactor),     TriUHV(latent_factor=lafactor)  ];
+    #method_list = [ PMF(latent_factor=lafactor),     TriUHV(latent_factor=lafactor)  ];
     
     # main method. 
     result = experiment_leave_k_out(exp_name, daily_data_file, min_occ_user, min_occ_prog, \

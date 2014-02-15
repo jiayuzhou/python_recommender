@@ -135,8 +135,11 @@ def experiment_unit_leave_k_out(exp_id, method, data_tr, data_left, iteration, t
     
     for user_idx in range(data_left.num_row): 
         # predict the entire row. 
-        pred_row = [user_idx] * col_num;
-        row_pred = method.predict(pred_row, pred_col);
+        
+        #pred_row = [user_idx] * col_num;
+        #row_pred = method.predict(pred_row, pred_col);
+        row_pred = method.predict_row(user_idx, pred_col);
+        
         # rank the column (the result is a list of indices).
         srt_col = [k[0] for k in sorted(enumerate(row_pred), key=lambda x:x[1], reverse=True)];
         # trained columns.

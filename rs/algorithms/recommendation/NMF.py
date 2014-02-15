@@ -91,6 +91,20 @@ class NMF(CFAlg):
         
         return result;
     
+    def predict_row(self, row_idx, col_idx_arr):
+        '''
+        Predict elements in specific locations for one row (user). The index is 0-based. 
+        
+        Parameters
+        ----------
+        @param row_idx:     the index or the row (user), 0-based. 
+        @param col_idx_arr: the indices for items. 
+        
+        Returns
+        ----------
+        @return: return a list of results (predicted values) at specified locations. 
+        '''
+        return (self.W[row_idx, :] * self.H[:, col_idx_arr]).tolist()[0];    
     
 if __name__ == '__main__':
     filename = "../../../datasample/agg_duid_pid_watchtime_genre/20131209_100000";
