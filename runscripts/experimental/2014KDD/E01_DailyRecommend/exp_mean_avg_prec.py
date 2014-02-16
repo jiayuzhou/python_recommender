@@ -6,45 +6,63 @@ Created on Feb 15, 2014
 @author: jiayu.zhou
 '''
 
+import sys;
 import numpy as np;
 from rs.algorithms.recommendation.LMaFit  import LMaFit;
 from rs.algorithms.recommendation.RandUV  import RandUV;
 from rs.algorithms.recommendation.HierLat import HierLat;
 from rs.algorithms.recommendation.NMF     import NMF;
+from rs.algorithms.recommendation.PMF     import PMF
+from rs.algorithms.recommendation.TriUHV  import TriUHV;
 from rs.experiments.dwt_rec_leave_N_out_map import experiment_leave_k_out_map
 
 if __name__ == '__main__':
     
     #daily_data_file = "../../../../datasample/agg_duid_pid_watchtime_genre/20131209_100000";
     
-    daily_data_file = ['/hadoop05/home/jiayu.zhou/data/agg_duid_pid_watchtime_genre/20140201/part-r-00000',
-                       '/hadoop05/home/jiayu.zhou/data/agg_duid_pid_watchtime_genre/20140202/part-r-00000',
-                       '/hadoop05/home/jiayu.zhou/data/agg_duid_pid_watchtime_genre/20140203/part-r-00000',
-                       '/hadoop05/home/jiayu.zhou/data/agg_duid_pid_watchtime_genre/20140204/part-r-00000',
-                       '/hadoop05/home/jiayu.zhou/data/agg_duid_pid_watchtime_genre/20140205/part-r-00000',
-                       '/hadoop05/home/jiayu.zhou/data/agg_duid_pid_watchtime_genre/20140206/part-r-00000',
-                       '/hadoop05/home/jiayu.zhou/data/agg_duid_pid_watchtime_genre/20140207/part-r-00000'
-                       ]
+    # latent factor
+    lafactor = 5;
+    leave_k_out = 1; # perform leave k out.
+
+    daily_data_file = [
+                    '/hadoop05/home/jiayu.zhou/data/agg_duid_pid_watchtime_genre/20140201/part-r-00000',
+                ]
+        
+#     daily_data_file = ['/hadoop05/home/jiayu.zhou/data/agg_duid_pid_watchtime_genre/20140201/part-r-00000',
+#                        '/hadoop05/home/jiayu.zhou/data/agg_duid_pid_watchtime_genre/20140202/part-r-00000',
+#                        '/hadoop05/home/jiayu.zhou/data/agg_duid_pid_watchtime_genre/20140203/part-r-00000',
+#                        '/hadoop05/home/jiayu.zhou/data/agg_duid_pid_watchtime_genre/20140204/part-r-00000',
+#                        '/hadoop05/home/jiayu.zhou/data/agg_duid_pid_watchtime_genre/20140205/part-r-00000',
+#                        '/hadoop05/home/jiayu.zhou/data/agg_duid_pid_watchtime_genre/20140206/part-r-00000',
+#                        '/hadoop05/home/jiayu.zhou/data/agg_duid_pid_watchtime_genre/20140207/part-r-00000'
+#                        ]
+    
+    if len(sys.argv) == 1:
+        print 'Use default leave k out: k=' + str(leave_k_out);
+    else:
+        leave_k_out = sys.argv[1];
+    
+    if len(sys.argv) <= 2:
+        print 'Use default latent factor: ' + str(lafactor); 
+    else:
+        lafactor = int(sys.argv[2]);
+        
     
     exp_name = 'exp_map_weekly_bin';
     
     # filtering criteria. 
-    min_occ_user = 50;
-    min_occ_prog = 300;
+    min_occ_user = 100;
+    min_occ_prog = 10000;
     
     max_rank = 1000;
-    
-    leave_k_out = 1; # perform leave k out.
     
     # number of repetitions. 
     total_iteration = 2;
     
-    # latent factor
-    lf = 5;
-    
     # recommendation algorithms 
-    method_list = [ LMaFit(latent_factor = 5), RandUV(latent_factor = 5), \
-                   HierLat(latent_factor = 5) , NMF(latent_factor = 5) ];
+    method_list = [ LMaFit(latent_factor=lafactor), RandUV(latent_factor=lafactor), \
+                    HierLat(latent_factor=lafactor), NMF(latent_factor=lafactor),
+                    PMF(latent_factor=lafactor),     TriUHV(latent_factor=lafactor)  ];
     
     # main method. 
     result = experiment_leave_k_out_map(exp_name, daily_data_file, min_occ_user, min_occ_prog, \
