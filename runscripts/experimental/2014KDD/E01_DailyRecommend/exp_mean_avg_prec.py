@@ -36,23 +36,29 @@ if __name__ == '__main__':
 #                        '/hadoop05/home/jiayu.zhou/data/agg_duid_pid_watchtime_genre/20140206/part-r-00000',
 #                        '/hadoop05/home/jiayu.zhou/data/agg_duid_pid_watchtime_genre/20140207/part-r-00000'
 #                        ]
-    
-    if len(sys.argv) == 1:
-        print 'Use default leave k out: k=' + str(leave_k_out);
-    else:
-        leave_k_out = int(sys.argv[1]);
-    
-    if len(sys.argv) <= 2:
-        print 'Use default latent factor: ' + str(lafactor); 
-    else:
-        lafactor = int(sys.argv[2]);
-        
-    
     exp_name = 'exp_map_weekly_bin';
     
+    if not len(sys.argv) == 1:
+        leave_k_out = int(sys.argv[1]);
+    print 'Use default leave k out: k=' + str(leave_k_out);
+    
+        
+    
+    if not len(sys.argv) <= 2:
+        lafactor = int(sys.argv[2]);
+    print 'Use default latent factor: ' + str(lafactor); 
+    
     # filtering criteria. 
-    min_occ_user = 100;
-    min_occ_prog = 10000;
+    min_occ_user = 50;
+    min_occ_prog = 500;
+    
+    if not len(sys.argv) <= 3:
+        min_occ_user = int(sys.argv[3]);
+    print 'Min occurances for user: ' + str(min_occ_user); 
+    
+    if not len(sys.argv) <= 4:
+        min_occ_prog = int(sys.argv[4]);
+    print 'Min occurances for program: ' + str(min_occ_prog); 
     
     max_rank = 1000;
     
