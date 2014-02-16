@@ -40,12 +40,18 @@ def experiment_leave_k_out_map(exp_name, daily_data_file, min_occ_user, min_occ_
     # define lko_log style. 
     lko_log = lambda msg: Logger.Log(msg, Logger.MSG_CATEGORY_EXP);
     
+    
+    if isinstance(daily_data_file, list):    
+        hash_file_str = str(hash(tuple(daily_data_file)));
+    else:
+        hash_file_str = str(hash(daily_data_file));
+    
     # construct exp_id
     if binary:
-        exp_id = 'lko_bi_' + exp_name + '_data' +str(hash(daily_data_file)) + '_mu' + str(min_occ_user) + '_mp' + str(min_occ_prog) \
+        exp_id = 'lko_bi_' + exp_name + '_data' + hash_file_str + '_mu' + str(min_occ_user) + '_mp' + str(min_occ_prog) \
                       + '_k' + str(leave_k_out) + '_toiter' + str(total_iteration);
     else:
-        exp_id = 'lko_' + exp_name + '_data' +str(hash(daily_data_file)) + '_mu' + str(min_occ_user) + '_mp' + str(min_occ_prog) \
+        exp_id = 'lko_' + exp_name + '_data' + hash_file_str + '_mu' + str(min_occ_user) + '_mp' + str(min_occ_prog) \
                       + '_k' + str(leave_k_out) + '_toiter' + str(total_iteration);
     lko_log('Experiment ID: ' + exp_id);
     

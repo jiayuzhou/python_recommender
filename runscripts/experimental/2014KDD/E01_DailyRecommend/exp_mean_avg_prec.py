@@ -48,7 +48,7 @@ if __name__ == '__main__':
     
     # main method. 
     result = experiment_leave_k_out_map(exp_name, daily_data_file, min_occ_user, min_occ_prog, \
-                method_list,  leave_k_out, total_iteration, max_rank);
+                method_list,  leave_k_out, total_iteration, max_rank, binary = True);
     
     for method_name, method_iter_perf in result.items():
         print 'Method: '+ method_name;
