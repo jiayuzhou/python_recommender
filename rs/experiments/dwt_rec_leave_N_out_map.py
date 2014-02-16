@@ -34,6 +34,10 @@ def experiment_leave_k_out_map(exp_name, daily_data_file, min_occ_user, min_occ_
     @return out 
     '''
     
+    print 'Leave k out: k = ', str(leave_k_out);
+    print 'Min_occ_user: ',    str(min_occ_user);
+    print 'Min_occ_prog: ',    str(min_occ_prog);
+    
     if leave_k_out >= min_occ_user:
         raise ValueError('The k in the leave k out should be strictly less than min_occ_user.'); 
     
