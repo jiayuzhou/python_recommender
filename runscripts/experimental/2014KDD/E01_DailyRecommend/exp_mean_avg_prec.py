@@ -40,7 +40,7 @@ if __name__ == '__main__':
     if len(sys.argv) == 1:
         print 'Use default leave k out: k=' + str(leave_k_out);
     else:
-        leave_k_out = sys.argv[1];
+        leave_k_out = int(sys.argv[1]);
     
     if len(sys.argv) <= 2:
         print 'Use default latent factor: ' + str(lafactor); 

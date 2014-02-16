@@ -40,7 +40,7 @@ def experiment_leave_k_out_map(exp_name, daily_data_file, min_occ_user, min_occ_
     
     if leave_k_out >= min_occ_user:
         raise ValueError('The k in the leave k out [' + str(leave_k_out) 
-                         +'] should be strictly less than min_occ_user [' + min_occ_user +'].'); 
+                         +'] should be strictly less than min_occ_user [' + str(min_occ_user) +'].'); 
     
     # define lko_log style. 
     lko_log = lambda msg: Logger.Log(msg, Logger.MSG_CATEGORY_EXP);
