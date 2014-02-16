@@ -1,8 +1,6 @@
 '''
 Experiment computing 
 
-Binary Setting.
-
 Created on Feb 15, 2014
 
 @author: jiayu.zhou
@@ -38,7 +36,7 @@ if __name__ == '__main__':
 #                        '/hadoop05/home/jiayu.zhou/data/agg_duid_pid_watchtime_genre/20140206/part-r-00000',
 #                        '/hadoop05/home/jiayu.zhou/data/agg_duid_pid_watchtime_genre/20140207/part-r-00000'
 #                        ]
-    exp_name = 'exp_map_weekly_bin';
+    exp_name = 'exp_map_weekly';
     
     if not len(sys.argv) == 1:
         leave_k_out = int(sys.argv[1]);
@@ -74,7 +72,7 @@ if __name__ == '__main__':
     
     # main method. 
     result = experiment_leave_k_out_map(exp_name, daily_data_file, min_occ_user, min_occ_prog, \
-                method_list,  leave_k_out, total_iteration, max_rank, binary = True);
+                method_list,  leave_k_out, total_iteration, max_rank, binary = False);
     
     for method_name, method_iter_perf in result.items():
         print 'Method: '+ method_name;
