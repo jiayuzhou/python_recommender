@@ -4,7 +4,7 @@ Created on Jan 29, 2014
 @author: jiayu.zhou
 '''
 
-from rs.algorithms.Alg import Alg;
+from rs.algorithms import Alg;
 
 class CFAlg(Alg):
     '''
