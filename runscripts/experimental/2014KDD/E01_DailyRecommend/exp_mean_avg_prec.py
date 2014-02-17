@@ -91,7 +91,7 @@ if __name__ == '__main__':
         #print '>>map:   ' 
         #print perf.tolist();
         
-        matlab_output[method_name:perf]; 
+        matlab_output[method_name]=perf; 
             
     # save to file.
     hash_file_str = str(hash(tuple(daily_data_file))); 
