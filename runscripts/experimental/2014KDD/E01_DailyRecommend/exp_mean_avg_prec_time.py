@@ -92,7 +92,7 @@ if __name__ == '__main__':
         matlab_output[method_name]= perf; 
         
     # save to file.
-    hash_file_str = str(hash(daily_data_file)); 
+    hash_file_str = str(hash(tuple(daily_data_file))); 
     matlab_file = 'lko_bi_' + exp_name + '_data' + hash_file_str + '_mu' + str(min_occ_user) + '_mp' + str(min_occ_prog) \
                       + '_k' + str(leave_k_out) + '_toiter' + str(total_iteration);
     sio.savemat(matlab_file, matlab_output);
