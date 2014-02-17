@@ -30,26 +30,34 @@ class DailyWatchTimeReader(object):
         #ttime_duid = {};
         #ttime_pid  = {};
         
-        lineNum = 0;
-        with open(filename, 'rb') as csvfile:
-            logreader = csv.reader(csvfile, delimiter = self.fieldDelimiter, quotechar = '|');
-            for logrow in logreader:
-                log_duid      = logrow[self.fieldMapping['duid']];
-                log_pid       = logrow[self.fieldMapping['pid']];
-                
-                if not (log_duid in occur_duid):
-                    occur_duid[log_duid]  = 1;
-                else:
-                    occur_duid[log_duid] += 1;
-                
-                if not (log_pid in occur_pid):
-                    occur_pid[log_pid]   = 1;
-                else:
-                    occur_pid[log_pid]  += 1;
+        # turn a single file into a file list. 
+        if not isinstance(filename, list):
+            filename_arr = [filename];
+        else:
+            filename_arr = filename;  
         
-                lineNum+=1;
-                if self.verbose and (lineNum % self.display == 0):
-                    Logger.Log(str(lineNum) + ' lines read.');
+        lineNum = 0;
+        
+        for filename in filename_arr:
+            with open(filename, 'rb') as csvfile:
+                logreader = csv.reader(csvfile, delimiter = self.fieldDelimiter, quotechar = '|');
+                for logrow in logreader:
+                    log_duid      = logrow[self.fieldMapping['duid']];
+                    log_pid       = logrow[self.fieldMapping['pid']];
+                    
+                    if not (log_duid in occur_duid):
+                        occur_duid[log_duid]  = 1;
+                    else:
+                        occur_duid[log_duid] += 1;
+                    
+                    if not (log_pid in occur_pid):
+                        occur_pid[log_pid]   = 1;
+                    else:
+                        occur_pid[log_pid]  += 1;
+            
+                    lineNum += 1;
+                    if self.verbose and (lineNum % self.display == 0):
+                        Logger.Log(str(lineNum) + ' lines read.');
                     
         # count occurrence into bins. 
         cnt_duid = {}; # cnt_duid[number of occurrence] = number of duid with specific occurrence. 
@@ -88,7 +96,7 @@ class DailyWatchTimeReader(object):
                 mapping is in R:/Data/Rovi/genre.csv, and a vintage copy is also kept in datasample/Rovi folder.
         '''
         
-        res_str  = 'DWT_RFWMV[' + filename + '][MIN DUID' + str(min_duid) + '][MIN PID' + str(min_pid) +']';
+        res_str  = 'DWT_RFWMV[' + str(filename) + '][MIN DUID' + str(min_duid) + '][MIN PID' + str(min_pid) +']';
         
         # We check if the current resource is available. If not then load from test data and save resource.  
         if not URM.CheckResource(URM.RTYPE_DATA, res_str): 
@@ -136,48 +144,56 @@ class DailyWatchTimeReader(object):
         visited_program_list = set([]);
         
         lineNum = 0;
-        with open(filename, 'rb') as csvfile:
-            logreader = csv.reader(csvfile, delimiter = self.fieldDelimiter, quotechar = '|');
-            for logrow in logreader:
-                log_duid      = logrow[self.fieldMapping['duid']];
-                log_pid       = logrow[self.fieldMapping['pid']];
-                log_pg_gr     = logrow[self.fieldMapping['genre']].strip();
-                
-                if not log_pg_gr:
-                    Logger.Log('Empty genre information for program '+log_pid, Logger.MSG_CATEGORY_DATA);
-                    if ignore_prog_without_genre:
-                        # ignore records whose program has no genre information. 
-                        continue;
-                
-                ## we need both duid and pid are in the list. 
-                if (log_duid in duidlist) and (log_pid in pidlist):
-                
-                    log_watchtime = int(logrow[self.fieldMapping['watchtime']]);
+        
+        # turn a single file into a file list. 
+        if not isinstance(filename, list):
+            filename_arr = [filename];
+        else:
+            filename_arr = filename;  
+        
+        for filename in filename_arr:
+            with open(filename, 'rb') as csvfile:
+                logreader = csv.reader(csvfile, delimiter = self.fieldDelimiter, quotechar = '|');
+                for logrow in logreader:
+                    log_duid      = logrow[self.fieldMapping['duid']];
+                    log_pid       = logrow[self.fieldMapping['pid']];
+                    log_pg_gr     = logrow[self.fieldMapping['genre']].strip();
                     
-                    if not (log_duid in mapping_duid):
-                        mapping_duid[log_duid] = len(mapping_duid);
-                    row.append(mapping_duid[log_duid]);
+                    if not log_pg_gr:
+                        Logger.Log('Empty genre information for program '+log_pid, Logger.MSG_CATEGORY_DATA);
+                        if ignore_prog_without_genre:
+                            # ignore records whose program has no genre information. 
+                            continue;
                     
-                    if not (log_pid in mapping_pid):
-                        mapping_pid[log_pid]   = len(mapping_pid);
-                    col.append(mapping_pid[log_pid]);
+                    ## we need both duid and pid are in the list. 
+                    if (log_duid in duidlist) and (log_pid in pidlist):
                     
-                    # store program - genre mappings, for programs that were not visited before.
-                    if not mapping_pid[log_pid] in visited_program_list: 
-                        for pg_gr in log_pg_gr.split(','):
-                            if not pg_gr:
-                                continue;
-                            
-                            pggr_pg.append(mapping_pid[log_pid]);
-                            pggr_gr.append(int(pg_gr));
-                            visited_program_list.add(mapping_pid[log_pid]);
+                        log_watchtime = int(logrow[self.fieldMapping['watchtime']]);
+                        
+                        if not (log_duid in mapping_duid):
+                            mapping_duid[log_duid] = len(mapping_duid);
+                        row.append(mapping_duid[log_duid]);
+                        
+                        if not (log_pid in mapping_pid):
+                            mapping_pid[log_pid]   = len(mapping_pid);
+                        col.append(mapping_pid[log_pid]);
+                        
+                        # store program - genre mappings, for programs that were not visited before.
+                        if not mapping_pid[log_pid] in visited_program_list: 
+                            for pg_gr in log_pg_gr.split(','):
+                                if not pg_gr:
+                                    continue;
+                                
+                                pggr_pg.append(mapping_pid[log_pid]);
+                                pggr_gr.append(int(pg_gr));
+                                visited_program_list.add(mapping_pid[log_pid]);
+                        
+                        data.append(log_watchtime);
                     
-                    data.append(log_watchtime);
-                
-                lineNum+=1;
-                
-                if self.verbose and (lineNum%self.display == 0):
-                    print str(lineNum), ' lines read.';
+                    lineNum+=1;
+                    
+                    if self.verbose and (lineNum%self.display == 0):
+                        print str(lineNum), ' lines read.';
                     
         if (self.verbose):
             Logger.Log('Done reading agg log file. '+str(len(data)) + ' elements read'+ \

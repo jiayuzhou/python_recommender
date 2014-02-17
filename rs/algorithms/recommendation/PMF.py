@@ -8,9 +8,9 @@ Created on Jan 31, 2014
 import numpy as np;
 from rs.algorithms.recommendation.generic_recalg import CFAlg;
 from rs.utils.log import Logger; 
-import scipy.sparse;
-import scipy.linalg;
-from rs.algorithms.recommendation.ProbabilisticMatrixFactorization import *;
+#import scipy.sparse;
+#import scipy.linalg;
+from rs.algorithms.recommendation.ProbabilisticMatrixFactorization import ProbabilisticMatrixFactorization;
 
 
 # an encapsulated logger.  
@@ -21,26 +21,30 @@ log = lambda message: Logger.Log(PMF.ALG_NAME + ':'+message, Logger.MSG_CATEGORY
 
 class PMF(CFAlg):
     '''
-    A random guess recommender (demo).
+    The probabilistic matrix factorization (PMF) algorithm.  
     '''
     ALG_NAME = 'PMF';
     
 ##################################################################################################
 
-    def __init__(self, latent_factor = 20, lamb = 1e-3, stop_delta = 1e-4, maxiter = 1e3, verbose = False):
+    def __init__(self, latent_factor = 20, lamb = 1e-3, learning_rate = 0.0001, maxiter = 100, verbose = False):
         '''
         Constructor
         '''
         # initialize parameters. 
         self.latent_factor = latent_factor;
         self.lamb = lamb;
-        self.delta = stop_delta; 
         self.maxiter = maxiter;
+        self.learn_rate = learning_rate;
         
-        log('dummy algorithm instance created: latent factor ' + str(self.latent_factor));
-        
+        log('PMF algorithm instance created: latent factor ' + str(self.latent_factor));
+         
         self.verbose = verbose;
-        
+    
+    def unique_str(self):
+        return PMF.ALG_NAME + '_k' + str(self.latent_factor) + '_lamb' + str(self.lamb)  \
+            + '_maxiter' + str(self.maxiter) + '_lr' + str(self.learn_rate);
+    
 ##################################################################################################
         
     def train(self, feedback_data):
@@ -49,13 +53,11 @@ class PMF(CFAlg):
         
         '''
         if self.verbose:
-            log('training dummy algorithm.');
+            log('training PMF algorithm.');
         
         m = feedback_data.num_row;
         n = feedback_data.num_col;  
         r = self.latent_factor;
-        lamb = self.lamb;
-        delta = self.delta;
         maxiter = self.maxiter;
         
         self.row = m;
@@ -70,10 +72,11 @@ class PMF(CFAlg):
         feedback_data.normalize_row();     
         # S_sparse = scipy.sparse.coo_matrix((np.array(feedback_data.data_val,dtype = np.float64),(feedback_data.data_row,feedback_data.data_col)),(m,n));    
         
-        ratings = [];
         ratings =  zip(feedback_data.data_row,feedback_data.data_col, feedback_data.data_val);
         
-        pmf = ProbabilisticMatrixFactorization(ratings, latent_d=r);
+        pmf = ProbabilisticMatrixFactorization(ratings, latent_d=r, \
+                                lamb = self.lamb, learning_rate = self.learn_rate);
+                                
         liks = []
         
         counter = 0;
@@ -91,7 +94,7 @@ class PMF(CFAlg):
 
         
         if self.verbose:
-            log('dummy algorithm trained.');
+            log('PMF algorithm trained.');
             
 ##################################################################################################
     
@@ -118,4 +121,20 @@ class PMF(CFAlg):
             log('predicted ' + str(len(row_idx_arr)) + ' elements.');
         
         return result;
+    
+    def predict_row(self, row_idx, col_idx_arr):
+        '''
+        Predict elements in specific locations for one row (user). The index is 0-based. 
+        
+        Parameters
+        ----------
+        @param row_idx:     the index or the row (user), 0-based. 
+        @param col_idx_arr: the indices for items. 
+        
+        Returns
+        ----------
+        @return: return a list of results (predicted values) at specified locations. 
+        '''
+        return (self.U[row_idx, :] * self.V[:, col_idx_arr]).tolist()[0];    
+    
     

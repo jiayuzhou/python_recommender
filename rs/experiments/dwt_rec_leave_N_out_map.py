@@ -1,4 +1,6 @@
 '''
+Leave-N-out cross-validation with mean average precision.  
+
 Created on Feb 11, 2014
 
 @author: jiayu.zhou
@@ -7,12 +9,12 @@ Created on Feb 11, 2014
 from rs.cache.urm import URM; 
 from rs.data.daily_watchtime import DailyWatchTimeReader;
 from rs.utils.log import Logger;
-from rs.experiments.evaluation import precision_itemlist, recall_itemlist, rmse;
+from rs.experiments.evaluation import rmse;
 import rs.data.data_split as ds;
 import numpy as np;
 
-def experiment_leave_k_out(exp_name, daily_data_file, min_occ_user, min_occ_prog, \
-                           method_list, leave_k_out, total_iteration, top_n, binary = False):
+def experiment_leave_k_out_map(exp_name, daily_data_file, min_occ_user, min_occ_prog, \
+                           method_list, leave_k_out, total_iteration, max_rank, binary = False):
     '''
     
     Parameters
@@ -32,18 +34,29 @@ def experiment_leave_k_out(exp_name, daily_data_file, min_occ_user, min_occ_prog
     @return out 
     '''
     
+    print 'Leave k out: k = ', str(leave_k_out);
+    print 'Min_occ_user: ',    str(min_occ_user);
+    print 'Min_occ_prog: ',    str(min_occ_prog);
+    
     if leave_k_out >= min_occ_user:
-        raise ValueError('The k in the leave k out should be strictly less than min_occ_user.'); 
+        raise ValueError('The k in the leave k out [' + str(leave_k_out) 
+                         +'] should be strictly less than min_occ_user [' + str(min_occ_user) +'].'); 
     
     # define lko_log style. 
     lko_log = lambda msg: Logger.Log(msg, Logger.MSG_CATEGORY_EXP);
     
+    
+    if isinstance(daily_data_file, list):    
+        hash_file_str = str(hash(tuple(daily_data_file)));
+    else:
+        hash_file_str = str(hash(daily_data_file));
+    
     # construct exp_id
     if binary:
-        exp_id = 'lko_bi_' + exp_name + '_data' +str(hash(daily_data_file)) + '_mu' + str(min_occ_user) + '_mp' + str(min_occ_prog) \
+        exp_id = 'lko_bi_' + exp_name + '_data' + hash_file_str + '_mu' + str(min_occ_user) + '_mp' + str(min_occ_prog) \
                       + '_k' + str(leave_k_out) + '_toiter' + str(total_iteration);
     else:
-        exp_id = 'lko_' + exp_name + '_data' +str(hash(daily_data_file)) + '_mu' + str(min_occ_user) + '_mp' + str(min_occ_prog) \
+        exp_id = 'lko_' + exp_name + '_data' + hash_file_str + '_mu' + str(min_occ_user) + '_mp' + str(min_occ_prog) \
                       + '_k' + str(leave_k_out) + '_toiter' + str(total_iteration);
     lko_log('Experiment ID: ' + exp_id);
     
@@ -84,8 +97,8 @@ def experiment_leave_k_out(exp_name, daily_data_file, min_occ_user, min_occ_prog
             # split the k items as a separate. 
             [data_left, data_tr] = data.leave_k_out(leave_k_out_idx); 
             
-            iter_result = experiment_unit_leave_k_out(exp_id, method, \
-                                    data_tr, data_left, iteration, top_n);
+            iter_result = experiment_unit_leave_k_out_map(exp_id, method, \
+                                    data_tr, data_left, iteration, max_rank);
             
             perf_vect.append(iter_result);
     
@@ -93,7 +106,7 @@ def experiment_leave_k_out(exp_name, daily_data_file, min_occ_user, min_occ_prog
     
     return result;
     
-def experiment_unit_leave_k_out(exp_id, method, data_tr, data_left, iteration, top_n):
+def experiment_unit_leave_k_out_map(exp_id, method, data_tr, data_left, iteration, max_rank):
     '''
     This method works on the column/row index of the data_tr and data_left, and 
     the data_tr and data_left must be completely aligned in both row-wise and column-wise. 
@@ -133,6 +146,8 @@ def experiment_unit_leave_k_out(exp_id, method, data_tr, data_left, iteration, t
     tr_data_csr = data_tr.get_sparse_matrix().tocsr();
     lo_data_csr = data_left.get_sparse_matrix().tocsr();
     
+    perf_vect = np.zeros(max_rank);
+    
     for user_idx in range(data_left.num_row): 
         # predict the entire row. 
         
@@ -142,18 +157,32 @@ def experiment_unit_leave_k_out(exp_id, method, data_tr, data_left, iteration, t
         
         # rank the column (the result is a list of indices).
         srt_col = [k[0] for k in sorted(enumerate(row_pred), key=lambda x:x[1], reverse=True)];
+        
         # trained columns.
         tr_col = set(np.nonzero(tr_data_csr[user_idx, :])[1].tolist());
-        # remove the trained column.
-        te_srt_col = [col_pos for col_pos in srt_col if col_pos not in tr_col];
-        # top - k (safeguard)
-        te_topk_col = te_srt_col[:min(top_n, len(te_srt_col)-1)]; 
+        
         # test column index;
         lo_col = set(np.nonzero(lo_data_csr[user_idx, :])[1].tolist());
         
-        prec = precision_itemlist (te_topk_col, lo_col);
-        rec  = recall_itemlist    (te_topk_col, lo_col); 
-    eval_result['prec']   = prec;
-    eval_result['recall'] = rec;
+        # remove the trained column from prediction. 
+        # this contains a set of indices that predicted (excluding training items).
+        te_srt_col = [col_pos for col_pos in srt_col if col_pos not in tr_col];
+        
+        #max_rank will result in an array of 0:max_rank-1;
+        
+        hit = 0; # the hit variable keeps track of the number of hits till the current rank. 
+        
+        for rk in range(max_rank):
+            # if rk is greater than the length of te_srt_col, then continue;
+            # if not, detect possible hits.
+            #    a hit is defined by items hits  
+            if (rk < len(te_srt_col)) and (te_srt_col[rk] in lo_col):
+                hit += 1;
+                
+            perf_vect[rk] += float(hit)/len(lo_col);
+    
+    perf_vect = perf_vect/data_left.num_row; #normalization over users. 
+         
+    eval_result['map']    = perf_vect;
     eval_result['rmse']   = rmse(data_left.data_val, method.predict(data_left.data_row, data_left.data_col));
     return eval_result;

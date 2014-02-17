@@ -159,6 +159,21 @@ class HierLat(CFAlg):
             log('predicted ' + str(len(row_idx_arr)) + ' elements.');
         
         return result;
+
+    def predict_row(self, row_idx, col_idx_arr):
+        '''
+        Predict elements in specific locations for one row (user). The index is 0-based. 
+        
+        Parameters
+        ----------
+        @param row_idx:     the index or the row (user), 0-based. 
+        @param col_idx_arr: the indices for items. 
+        
+        Returns
+        ----------
+        @return: return a list of results (predicted values) at specified locations. 
+        '''
+        return (self.U[row_idx, :] * self.HV[:, col_idx_arr]).tolist()[0];
     
     @staticmethod
     def learnU (S_sparse,U,U_prev,H,H_prev,V,V_prev,lamb):

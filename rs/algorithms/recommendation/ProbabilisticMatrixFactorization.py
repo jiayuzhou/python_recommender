@@ -4,10 +4,10 @@ import numpy as np
 
 class ProbabilisticMatrixFactorization():
 
-    def __init__(self, rating_tuples, latent_d=1):
-        self.latent_d = latent_d
-        self.learning_rate = .0001
-        self.regularization_strength = 0.1
+    def __init__(self, rating_tuples, latent_d=1, lamb = 0.1, learning_rate = 0.0001):
+        self.latent_d = latent_d;
+        self.learning_rate = learning_rate;
+        self.regularization_strength = lamb;
         
         self.ratings = np.array(rating_tuples).astype(float)
         self.converged = False
@@ -40,7 +40,7 @@ class ProbabilisticMatrixFactorization():
             elif len(rating_tuple) == 4:
                 (i, j, rating, weight) = rating_tuple
             
-            r_hat = np.sum(users[i] * items[j])
+            r_hat = np.sum(users[int(i)] * items[int(j)])
 
             sq_error += weight * (rating - r_hat)**2
 
@@ -67,6 +67,9 @@ class ProbabilisticMatrixFactorization():
                 weight = 1
             elif len(rating_tuple) == 4:
                 (i, j, rating, weight) = rating_tuple
+            
+            i = int(i);
+            j = int(j);
             
             r_hat = np.sum(self.users[i] * self.items[j])
             

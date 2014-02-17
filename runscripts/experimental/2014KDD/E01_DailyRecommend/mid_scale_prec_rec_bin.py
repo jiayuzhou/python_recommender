@@ -10,7 +10,8 @@ from rs.algorithms.recommendation.LMaFit import LMaFit;
 from rs.algorithms.recommendation.RandUV import RandUV;
 from rs.algorithms.recommendation.HierLat import HierLat
 from rs.algorithms.recommendation.NMF import NMF
-from rs.algorithms.recommendation import PMF, TriUHV
+from rs.algorithms.recommendation.PMF import PMF
+from rs.algorithms.recommendation.TriUHV import TriUHV;
 
 
 if __name__ == '__main__':
@@ -33,7 +34,7 @@ if __name__ == '__main__':
     if not os.path.isfile(daily_data_file):
         raise ValueError('Cannot find data file. ');
     
-    exp_name = 'test_exp_mid_prec_rec'; # something meaningful. 
+    exp_name = 'bin_exp_mid_prec_rec'; # something meaningful. 
     
     # filtering criteria
     min_occ_user = 35;
@@ -48,12 +49,14 @@ if __name__ == '__main__':
     
     # recommendation algorithms 
     method_list = [ LMaFit(latent_factor=lafactor), RandUV(latent_factor=lafactor), \
-                   HierLat(latent_factor=lafactor), NMF(latent_factor=lafactor),
-                   PMF(latent_factor=lafactor),     TriUHV(latent_factor=lafactor)  ];
+                    HierLat(latent_factor=lafactor), NMF(latent_factor=lafactor),
+                    PMF(latent_factor=lafactor),     TriUHV(latent_factor=lafactor)  ];
+                   
+    #method_list = [ PMF(latent_factor=lafactor),     TriUHV(latent_factor=lafactor)  ];
     
     # main method. 
     result = experiment_leave_k_out(exp_name, daily_data_file, min_occ_user, min_occ_prog, \
-                method_list,  leave_k_out, total_iteration, top_n);
+                method_list,  leave_k_out, total_iteration, top_n, True);
     
     # display results (average RMSE). 
     for method_name, method_iter_perf in result.items():
