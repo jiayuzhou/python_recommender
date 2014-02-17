@@ -10,6 +10,7 @@ Created on Feb 15, 2014
 
 import sys;
 import numpy as np;
+import scipy.io as sio;
 from rs.algorithms.recommendation.LMaFit  import LMaFit;
 from rs.algorithms.recommendation.RandUV  import RandUV;
 from rs.algorithms.recommendation.HierLat import HierLat;
@@ -62,7 +63,7 @@ if __name__ == '__main__':
         min_occ_prog = int(sys.argv[4]);
     print 'Min occurances for program: ' + str(min_occ_prog); 
     
-    max_rank = 1000;
+    max_rank = 2000;
     
     # number of repetitions. 
     total_iteration = 2;
@@ -76,6 +77,7 @@ if __name__ == '__main__':
     result = experiment_leave_k_out_map(exp_name, daily_data_file, min_occ_user, min_occ_prog, \
                 method_list,  leave_k_out, total_iteration, max_rank, binary = True);
     
+    matlab_output = {};
     for method_name, method_iter_perf in result.items():
         print 'Method: '+ method_name;
         print  '>>Average rmse      : %.5f' % (sum( x['rmse']   for x in method_iter_perf)/len(method_iter_perf));
@@ -86,7 +88,13 @@ if __name__ == '__main__':
             
         perf = perf / len(method_iter_perf); 
         
-        print '>>map:   ' 
-        print perf.tolist();
+        #print '>>map:   ' 
+        #print perf.tolist();
+        
+        matlab_output[method_name:perf]; 
             
-    
+    # save to file.
+    hash_file_str = str(hash(tuple(daily_data_file))); 
+    matlab_file = 'lko_bi_' + exp_name + '_data' + hash_file_str + '_mu' + str(min_occ_user) + '_mp' + str(min_occ_prog) \
+                      + '_k' + str(leave_k_out) + '_toiter' + str(total_iteration);
+    sio.savemat(matlab_file, matlab_output);
