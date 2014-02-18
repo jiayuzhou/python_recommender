@@ -27,41 +27,37 @@ if __name__ == '__main__':
     lafactor = 5;
     leave_k_out = 1; # perform leave k out.
 
-    daily_data_file = [
-                    '/hadoop05/home/jiayu.zhou/data/agg_duid_pid_watchtime_genre/20140201/part-r-00000',
-                ]
+#     daily_data_file = [
+#                     '/hadoop05/home/jiayu.zhou/data/agg_duid_pid_watchtime_genre/20140201/part-r-00000',
+#                 ]
+#     exp_name = 'exp_map_weekly_bin';
+#     min_occ_user = 50;
+#     min_occ_prog = 500;
         
-#     daily_data_file = ['/hadoop05/home/jiayu.zhou/data/agg_duid_pid_watchtime_genre/20140201/part-r-00000',
-#                        '/hadoop05/home/jiayu.zhou/data/agg_duid_pid_watchtime_genre/20140202/part-r-00000',
-#                        '/hadoop05/home/jiayu.zhou/data/agg_duid_pid_watchtime_genre/20140203/part-r-00000',
-#                        '/hadoop05/home/jiayu.zhou/data/agg_duid_pid_watchtime_genre/20140204/part-r-00000',
-#                        '/hadoop05/home/jiayu.zhou/data/agg_duid_pid_watchtime_genre/20140205/part-r-00000',
-#                        '/hadoop05/home/jiayu.zhou/data/agg_duid_pid_watchtime_genre/20140206/part-r-00000',
-#                        '/hadoop05/home/jiayu.zhou/data/agg_duid_pid_watchtime_genre/20140207/part-r-00000'
-#                        ]
-    exp_name = 'exp_map_weekly_bin';
+    daily_data_file = ['/hadoop05/home/jiayu.zhou/data/agg_duid_pid_watchtime_genre/20140201/part-r-00000',
+                       '/hadoop05/home/jiayu.zhou/data/agg_duid_pid_watchtime_genre/20140202/part-r-00000',
+                       '/hadoop05/home/jiayu.zhou/data/agg_duid_pid_watchtime_genre/20140203/part-r-00000',
+                       '/hadoop05/home/jiayu.zhou/data/agg_duid_pid_watchtime_genre/20140204/part-r-00000',
+                       '/hadoop05/home/jiayu.zhou/data/agg_duid_pid_watchtime_genre/20140205/part-r-00000',
+                       '/hadoop05/home/jiayu.zhou/data/agg_duid_pid_watchtime_genre/20140206/part-r-00000',
+                       '/hadoop05/home/jiayu.zhou/data/agg_duid_pid_watchtime_genre/20140207/part-r-00000'
+                       ]
+    exp_name = 'exp_map_Feb1to7_randsplit_bin';
+    # filtering criteria.
+    min_occ_user = 50;
+    min_occ_prog = 1000;
+    
+    num_user = 10000;
+    num_prog = 3000;
+    
     
     if not len(sys.argv) == 1:
         leave_k_out = int(sys.argv[1]);
     print 'Use default leave k out: k=' + str(leave_k_out);
     
-        
-    
     if not len(sys.argv) <= 2:
         lafactor = int(sys.argv[2]);
     print 'Use default latent factor: ' + str(lafactor); 
-    
-    # filtering criteria. 
-    min_occ_user = 50;
-    min_occ_prog = 500;
-    
-    if not len(sys.argv) <= 3:
-        min_occ_user = int(sys.argv[3]);
-    print 'Min occurances for user: ' + str(min_occ_user); 
-    
-    if not len(sys.argv) <= 4:
-        min_occ_prog = int(sys.argv[4]);
-    print 'Min occurances for program: ' + str(min_occ_prog); 
     
     max_rank = 2000;
     
@@ -74,7 +70,8 @@ if __name__ == '__main__':
                     PMF(latent_factor=lafactor),     TriUHV(latent_factor=lafactor)  ];
     
     # main method. 
-    result = experiment_leave_k_out_map(exp_name, daily_data_file, min_occ_user, min_occ_prog, \
+    result = experiment_leave_k_out_map(exp_name, daily_data_file, \
+                min_occ_user, min_occ_prog, num_user, num_prog,\
                 method_list,  leave_k_out, total_iteration, max_rank, binary = True);
     
     matlab_output = {};

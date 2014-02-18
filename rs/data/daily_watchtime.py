@@ -86,9 +86,9 @@ class DailyWatchTimeReader(object):
         
         Parameters
         ----------
-        filename: a string consists of the file name and location of the data file to be read.
-        min_duid: a positive integer. the minimum occurrence of a device for the device to be included.
-        min_pid:  a positive integer. the minimum occurrence of a program for the program to be included. 
+        @param filename: a string consists of the file name and location of the data file to be read.
+        @param min_duid: a positive integer. the minimum occurrence of a device for the device to be included.
+        @param min_pid:  a positive integer. the minimum occurrence of a program for the program to be included. 
          
         Returns
         ----------
