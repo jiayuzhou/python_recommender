@@ -13,16 +13,19 @@ from rs.experiments.evaluation import rmse;
 import rs.data.data_split as ds;
 import numpy as np;
 
-def experiment_leave_k_out_map(exp_name, daily_data_file, min_occ_user, min_occ_prog, \
-                           method_list, leave_k_out, total_iteration, max_rank, binary = False):
+def experiment_leave_k_out_map(exp_name,     daily_data_file,\
+                    min_occ_user, min_occ_prog, num_user, num_prog,\
+                    method_list, leave_k_out, total_iteration, max_rank, binary = False):
     '''
     
     Parameters
     ----------
-    @param exp_name: the experiment name (prefix) 
-    @param daily_datafile:
-    @param min_occ_user:
-    
+    @param exp_name:       the experiment name (prefix) 
+    @param daily_datafile: a list of files. 
+    @param min_occ_user:   cold start user criteria
+    @param min_occ_prog:   cold start user criteria
+    @param num_user:       the number of users selected in the experiment. 
+    @param num_prog:       the number of programs selected in the experiment. 
     @param method_list:
     @param leave_k_out: leave k out for each user. The k must be strict less than
          min_occ_user
@@ -53,17 +56,21 @@ def experiment_leave_k_out_map(exp_name, daily_data_file, min_occ_user, min_occ_
     
     # construct exp_id
     if binary:
-        exp_id = 'lko_bi_' + exp_name + '_data' + hash_file_str + '_mu' + str(min_occ_user) + '_mp' + str(min_occ_prog) \
+        exp_id = 'lko_bi_' + exp_name + '_data' + hash_file_str\
+                      + '_mu' + str(min_occ_user) + '_mp' + str(min_occ_prog) \
+                      + '_nu' + str(num_user) + '_np' + str(num_prog) \
                       + '_k' + str(leave_k_out) + '_toiter' + str(total_iteration);
     else:
-        exp_id = 'lko_' + exp_name + '_data' + hash_file_str + '_mu' + str(min_occ_user) + '_mp' + str(min_occ_prog) \
+        exp_id = 'lko_'    + exp_name + '_data' + hash_file_str\
+                      + '_mu' + str(min_occ_user) + '_mp' + str(min_occ_prog) \
+                      + '_nu' + str(num_user) + '_np' + str(num_prog) \
                       + '_k' + str(leave_k_out) + '_toiter' + str(total_iteration);
     lko_log('Experiment ID: ' + exp_id);
     
     # load data. 
     lko_log('Read data...');
     reader = DailyWatchTimeReader();
-    data = reader.read_file_with_minval(daily_data_file, min_occ_user, min_occ_prog);
+    data = reader.read_file_with_minval(daily_data_file, min_occ_user, min_occ_prog, num_user, num_prog);
     lko_log('Data loaded: ' + str(data));
     
     if binary:

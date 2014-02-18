@@ -8,6 +8,7 @@ import csv;
 from rs.cache.urm import URM;
 from rs.utils.log import Logger;
 from rs.data.recdata import FeedbackData;
+import random;
 
 class DailyWatchTimeReader(object):
 
@@ -77,7 +78,7 @@ class DailyWatchTimeReader(object):
         return [occur_duid, occur_pid, cnt_duid, cnt_pid];
     
     
-    def read_file_with_minval(self, filename, min_duid, min_pid):
+    def read_file_with_minval(self, filename, min_duid, min_pid, num_duid = None, num_pid = None, rand_seed = 1):
         '''
         This method first goes through the data once, and filter out 
         the device and program that has occurrences below specified values. 
@@ -96,7 +97,18 @@ class DailyWatchTimeReader(object):
                 mapping is in R:/Data/Rovi/genre.csv, and a vintage copy is also kept in datasample/Rovi folder.
         '''
         
-        res_str  = 'DWT_RFWMV[' + str(filename) + '][MIN DUID' + str(min_duid) + '][MIN PID' + str(min_pid) +']';
+        if num_duid is None and num_pid is None:
+            subsample = False;
+            res_str  = 'DWT_RFWMV[' + str(filename) + '][MIN DUID' + str(min_duid) + '][MIN PID' + str(min_pid) +']';
+        elif num_duid is not None and num_pid is not None:
+            subsample = True;
+            res_str  = 'DWT_RFWMV[' + str(filename) + '][MIN DUID' + str(min_duid) + '][MIN PID' + str(min_pid) +']'\
+                            + '[NUM DUID' + str(num_duid) + ']' + '[NUM PID' + str(num_pid) + ']';
+        else:
+            raise ValueError('num_duid and num_pid should be both set or both use default');
+        
+        
+        
         
         # We check if the current resource is available. If not then load from test data and save resource.  
         if not URM.CheckResource(URM.RTYPE_DATA, res_str): 
@@ -106,10 +118,27 @@ class DailyWatchTimeReader(object):
             print str(len(occur_duid)), 'devices', str(len(occur_pid)), 'programs';
             
             Logger.Log('Generating filtering indices...');
-            duidlist = set([sel_duid for sel_duid, sel_duidcnt in occur_duid.iteritems() if sel_duidcnt > min_duid]);
-            pidlist  = set([sel_pid  for sel_pid,  sel_pidcnt  in occur_pid.iteritems()  if sel_pidcnt  > min_pid]);
+            duidlist = [sel_duid for sel_duid, sel_duidcnt in occur_duid.iteritems() if sel_duidcnt > min_duid];
+            pidlist  = [sel_pid  for sel_pid,  sel_pidcnt  in occur_pid.iteritems()  if sel_pidcnt  > min_pid];
+            
             print 'After filtering [MIN_DUID',str(min_duid), ' MIN_PID:', str(min_pid),']:',\
                 str(len(occur_duid)), 'devices', str(len(occur_pid)), 'programs';
+            
+            # perform random sampling.
+            if subsample:
+                random.seed(rand_seed);
+                if len(duidlist) > num_duid:
+                    # subsample DUID;
+                    random.shuffle(duidlist);
+                    duidlist = duidlist[:num_duid];
+                
+                if len(pidlist)  > num_pid:
+                    # subsample PID;
+                    random.shuffle(pidlist);
+                    pidlist  = pidlist[:num_pid];
+            
+            duidlist = set(duidlist);
+            pidlist  = set(pidlist);
             
             # read the raw data file with the list.
             [mapping_duid, mapping_pid, row, col, data, pggr_pg, pggr_gr] \

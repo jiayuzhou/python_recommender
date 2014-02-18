@@ -1,6 +1,8 @@
 '''
 Experiment computing 
 
+watchtime setting. 
+
 Created on Feb 15, 2014
 
 @author: jiayu.zhou
@@ -28,16 +30,24 @@ if __name__ == '__main__':
     daily_data_file = [
                     '/hadoop05/home/jiayu.zhou/data/agg_duid_pid_watchtime_genre/20140201/part-r-00000',
                 ]
-        
-#     daily_data_file = ['/hadoop05/home/jiayu.zhou/data/agg_duid_pid_watchtime_genre/20140201/part-r-00000',
-#                        '/hadoop05/home/jiayu.zhou/data/agg_duid_pid_watchtime_genre/20140202/part-r-00000',
-#                        '/hadoop05/home/jiayu.zhou/data/agg_duid_pid_watchtime_genre/20140203/part-r-00000',
-#                        '/hadoop05/home/jiayu.zhou/data/agg_duid_pid_watchtime_genre/20140204/part-r-00000',
-#                        '/hadoop05/home/jiayu.zhou/data/agg_duid_pid_watchtime_genre/20140205/part-r-00000',
-#                        '/hadoop05/home/jiayu.zhou/data/agg_duid_pid_watchtime_genre/20140206/part-r-00000',
-#                        '/hadoop05/home/jiayu.zhou/data/agg_duid_pid_watchtime_genre/20140207/part-r-00000'
-#                        ]
     exp_name = 'exp_map_weekly';
+    min_occ_user = 50;
+    min_occ_prog = 500;
+    
+    daily_data_file = ['/hadoop05/home/jiayu.zhou/data/agg_duid_pid_watchtime_genre/20140201/part-r-00000',
+                       '/hadoop05/home/jiayu.zhou/data/agg_duid_pid_watchtime_genre/20140202/part-r-00000',
+                       '/hadoop05/home/jiayu.zhou/data/agg_duid_pid_watchtime_genre/20140203/part-r-00000',
+                       '/hadoop05/home/jiayu.zhou/data/agg_duid_pid_watchtime_genre/20140204/part-r-00000',
+                       '/hadoop05/home/jiayu.zhou/data/agg_duid_pid_watchtime_genre/20140205/part-r-00000',
+                       '/hadoop05/home/jiayu.zhou/data/agg_duid_pid_watchtime_genre/20140206/part-r-00000',
+                       '/hadoop05/home/jiayu.zhou/data/agg_duid_pid_watchtime_genre/20140207/part-r-00000'
+                       ]
+    min_occ_user = 50;
+    min_occ_prog = 500;
+    
+    num_user = 10000;
+    num_prog = 3000;
+    
     
     if not len(sys.argv) == 1:
         leave_k_out = int(sys.argv[1]);
@@ -50,12 +60,11 @@ if __name__ == '__main__':
     print 'Use default latent factor: ' + str(lafactor); 
     
     # filtering criteria. 
-    min_occ_user = 50;
-    min_occ_prog = 500;
+    
     
     if not len(sys.argv) <= 3:
         min_occ_user = int(sys.argv[3]);
-    print 'Min occurances for user: ' + str(min_occ_user); 
+    print 'Min occurances for user: '    + str(min_occ_user); 
     
     if not len(sys.argv) <= 4:
         min_occ_prog = int(sys.argv[4]);
@@ -67,12 +76,13 @@ if __name__ == '__main__':
     total_iteration = 2;
     
     # recommendation algorithms 
-    method_list = [ LMaFit(latent_factor=lafactor), RandUV(latent_factor=lafactor), \
+    method_list = [ LMaFit(latent_factor=lafactor),  RandUV(latent_factor=lafactor), \
                     HierLat(latent_factor=lafactor), NMF(latent_factor=lafactor),
                     PMF(latent_factor=lafactor),     TriUHV(latent_factor=lafactor)  ];
     
     # main method. 
-    result = experiment_leave_k_out_map(exp_name, daily_data_file, min_occ_user, min_occ_prog, \
+    result = experiment_leave_k_out_map(exp_name, daily_data_file, \
+                min_occ_user, min_occ_prog, num_user, num_prog,\
                 method_list,  leave_k_out, total_iteration, max_rank, binary = False);
     
     matlab_output = {};
