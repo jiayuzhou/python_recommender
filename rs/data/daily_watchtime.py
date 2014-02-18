@@ -78,10 +78,11 @@ class DailyWatchTimeReader(object):
         return [occur_duid, occur_pid, cnt_duid, cnt_pid];
     
     
-    def read_file_with_minval(self, filename, min_duid, min_pid, num_duid = None, num_pid = None, rand_seed = 1):
+    def read_file_with_minval(self, filename, min_duid, min_pid, num_duid = None, num_pid = None, rand_seed = 1): 
         '''
         This method first goes through the data once, and filter out 
         the device and program that has occurrences below specified values. 
+        Support random undersampling.
         
         Parameters
         ----------
