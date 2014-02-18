@@ -12,7 +12,7 @@ import sys;
 import numpy as np;
 import scipy.io as sio;
 from rs.algorithms.recommendation.LMaFit  import LMaFit;
-from rs.algorithms.recommendation.RandUV  import RandUV;
+#from rs.algorithms.recommendation.RandUV  import RandUV;
 from rs.algorithms.recommendation.HierLat import HierLat;
 from rs.algorithms.recommendation.NMF     import NMF;
 from rs.algorithms.recommendation.PMF     import PMF
@@ -80,7 +80,7 @@ if __name__ == '__main__':
         rmse = sum( x['RMSE']   for x in method_iter_perf)/len(method_iter_perf);
         print  '>>Average RMSE      : %.5f' % rmse;
         
-        perf_recall = np.zeros(len(method_iter_perf[0]['map']));
+        perf_recall = np.zeros(len(method_iter_perf[0]['recall']));
         perf_precision = np.zeros(len(method_iter_perf[0]['precision']));
         
         for x in method_iter_perf:

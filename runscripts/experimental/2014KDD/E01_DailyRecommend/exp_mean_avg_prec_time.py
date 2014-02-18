@@ -12,7 +12,7 @@ import sys;
 import numpy as np;
 import scipy.io as sio;
 from rs.algorithms.recommendation.LMaFit  import LMaFit;
-from rs.algorithms.recommendation.RandUV  import RandUV;
+#from rs.algorithms.recommendation.RandUV  import RandUV;
 from rs.algorithms.recommendation.HierLat import HierLat;
 from rs.algorithms.recommendation.NMF     import NMF;
 from rs.algorithms.recommendation.PMF     import PMF
