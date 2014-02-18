@@ -153,7 +153,9 @@ def experiment_unit_leave_k_out_map(exp_id, method, data_tr, data_left, iteratio
     tr_data_csr = data_tr.get_sparse_matrix().tocsr();
     lo_data_csr = data_left.get_sparse_matrix().tocsr();
     
-    perf_vect = np.zeros(max_rank);
+    perf_vect_prec = np.zeros(max_rank); # precision 
+    perf_vect_rec  = np.zeros(max_rank); # recall 
+    perf_vect_hr   = np.zeros(max_rank); # hit rate (Modification of Xia Ning's Paper) 
     
     for user_idx in range(data_left.num_row): 
         # predict the entire row. 
@@ -185,11 +187,18 @@ def experiment_unit_leave_k_out_map(exp_id, method, data_tr, data_left, iteratio
             #    a hit is defined by items hits  
             if (rk < len(te_srt_col)) and (te_srt_col[rk] in lo_col):
                 hit += 1;
-                
-            perf_vect[rk] += float(hit)/len(lo_col);
-    
-    perf_vect = perf_vect/data_left.num_row; #normalization over users. 
+            
+            perf_vect_hr[rk]   += float(hit)/len(lo_col); # hit rate
+            perf_vect_prec[rk] += float(hit)/rk;          # precision
+            perf_vect_rec[rk]  += float(hit)/len(lo_col); # recall
+
+    #normalization over users.
+    perf_vect_hr   = perf_vect_hr/data_left.num_row; 
+    perf_vect_prec = perf_vect_prec/data_left.num_row;
+    perf_vect_rec  = perf_vect_rec/data_left.num_row;
          
-    eval_result['map']    = perf_vect;
-    eval_result['rmse']   = rmse(data_left.data_val, method.predict(data_left.data_row, data_left.data_col));
+    eval_result['hit_rate']  = perf_vect_hr;
+    eval_result['precision'] = perf_vect_prec; 
+    eval_result['recall']    = perf_vect_rec; 
+    eval_result['RMSE']      = rmse(data_left.data_val, method.predict(data_left.data_row, data_left.data_col));
     return eval_result;

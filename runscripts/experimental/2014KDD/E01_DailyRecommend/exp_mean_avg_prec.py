@@ -64,8 +64,8 @@ if __name__ == '__main__':
     # number of repetitions. 
     total_iteration = 2;
     
-    # recommendation algorithms 
-    method_list = [ LMaFit(latent_factor=lafactor), RandUV(latent_factor=lafactor), \
+    # recommendation algorithms %RandUV(latent_factor=lafactor),
+    method_list = [ LMaFit(latent_factor=lafactor),  \
                     HierLat(latent_factor=lafactor), NMF(latent_factor=lafactor),
                     PMF(latent_factor=lafactor),     TriUHV(latent_factor=lafactor)  ];
     
@@ -77,21 +77,28 @@ if __name__ == '__main__':
     matlab_output = {};
     for method_name, method_iter_perf in result.items():
         print 'Method: '+ method_name;
-        print  '>>Average rmse      : %.5f' % (sum( x['rmse']   for x in method_iter_perf)/len(method_iter_perf));
+        rmse = sum( x['RMSE']   for x in method_iter_perf)/len(method_iter_perf);
+        print  '>>Average RMSE      : %.5f' % rmse;
         
-        perf = np.zeros(len(method_iter_perf[0]['map']));
+        perf_recall = np.zeros(len(method_iter_perf[0]['map']));
+        perf_precision = np.zeros(len(method_iter_perf[0]['precision']));
+        
         for x in method_iter_perf:
-            perf += np.array(x['map']);
+            perf_recall    += np.array(x['recall']);
+            perf_precision += np.array(x['precision']);
             
-        perf = perf / len(method_iter_perf); 
+        perf_precision = perf_precision / len(method_iter_perf);
+        perf_recall    = perf_recall    / len(method_iter_perf); 
         
-        #print '>>map:   ' 
-        #print perf.tolist();
-        
-        matlab_output[method_name.replace('.', '_')]=perf; 
+        # convert to valid MATLAB name.
+        matlab_var_name = method_name.replace('.', '_').replace(' ', '_');
+        matlab_output['REC_'  + matlab_var_name] = perf_recall;
+        matlab_output['PREC_' + matlab_var_name] = perf_precision;
+        matlab_output['RMSE_' + matlab_var_name] = rmse; 
             
     # save to file.
     hash_file_str = str(hash(tuple(daily_data_file))); 
     matlab_file = 'lko_bi_' + exp_name + '_data' + hash_file_str + '_mu' + str(min_occ_user) + '_mp' + str(min_occ_prog) \
                       + '_k' + str(leave_k_out) + '_toiter' + str(total_iteration);
     sio.savemat(matlab_file, matlab_output);
+    
