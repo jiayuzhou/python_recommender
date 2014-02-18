@@ -189,7 +189,7 @@ def experiment_unit_leave_k_out_map(exp_id, method, data_tr, data_left, iteratio
                 hit += 1;
             
             perf_vect_hr[rk]   += float(hit)/len(lo_col); # hit rate
-            perf_vect_prec[rk] += float(hit)/rk;          # precision
+            perf_vect_prec[rk] += float(hit)/(rk+1);          # precision
             perf_vect_rec[rk]  += float(hit)/len(lo_col); # recall
 
     #normalization over users.
