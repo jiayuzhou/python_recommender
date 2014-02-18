@@ -9,9 +9,7 @@ import numpy as np;
 from rs.algorithms.recommendation.generic_recalg import CFAlg;
 from rs.utils.log import Logger; 
 import scipy.sparse;
-import scipy.linalg
-
-
+#import scipy.linalg
 
 # an encapsulated logger.  
 log = lambda message: Logger.Log(item_item_sim.ALG_NAME + ':'+message, \
@@ -168,6 +166,21 @@ class item_item_sim(CFAlg):
         return result;        
     
     
-    
+    def predict_row(self, row_idx, col_idx_arr):
+        '''
+        Predict elements in specific locations for one row (user). The index is 0-based. 
+        
+        Parameters
+        ----------
+        @param row_idx:     the index or the row (user), 0-based. 
+        @param col_idx_arr: the indices for items. 
+        
+        Returns
+        ----------
+        @return: return a list of results (predicted values) at specified locations. 
+        '''
+        
+        result =  [ self.S_out[row,col] for (row, col) in zip([row_idx] * len(col_idx_arr), col_idx_arr) ];
+        return result;     
         
    

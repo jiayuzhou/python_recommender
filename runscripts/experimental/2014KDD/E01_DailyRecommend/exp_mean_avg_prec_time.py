@@ -18,6 +18,7 @@ from rs.algorithms.recommendation.NMF     import NMF;
 from rs.algorithms.recommendation.PMF     import PMF
 from rs.algorithms.recommendation.TriUHV  import TriUHV;
 from rs.experiments.dwt_rec_leave_N_out_map import experiment_leave_k_out_map
+from rs.algorithms.recommendation.item_item_sim import item_item_sim
 
 if __name__ == '__main__':
     
@@ -50,7 +51,6 @@ if __name__ == '__main__':
     num_user = 10000;
     num_prog = 3000;
     
-    
     if not len(sys.argv) == 1:
         leave_k_out = int(sys.argv[1]);
     print 'Use default leave k out: k=' + str(leave_k_out);
@@ -65,7 +65,7 @@ if __name__ == '__main__':
     total_iteration = 2;
     
     # recommendation algorithms RandUV(latent_factor=lafactor),
-    method_list = [ LMaFit(latent_factor=lafactor),   \
+    method_list = [ LMaFit(latent_factor=lafactor),  item_item_sim(N = lafactor),\
                     HierLat(latent_factor=lafactor), NMF(latent_factor=lafactor),
                     PMF(latent_factor=lafactor),     TriUHV(latent_factor=lafactor)  ];
     
@@ -99,6 +99,6 @@ if __name__ == '__main__':
     # save to file.
     hash_file_str = str(hash(tuple(daily_data_file))); 
     matlab_file = 'lko_bi_' + exp_name + '_data' + hash_file_str + '_mu' + str(min_occ_user) + '_mp' + str(min_occ_prog) \
-                      + '_k' + str(leave_k_out) + '_toiter' + str(total_iteration);
+                      + '_k' + str(leave_k_out) + '_toiter' + str(total_iteration) + '_fa' + lafactor;
     sio.savemat(matlab_file, matlab_output);
     

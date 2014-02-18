@@ -12,3 +12,11 @@ rs/algorithms/recommendation/PMF.pyc
 rs/algorithms/recommendation/TriUHV.pyc
 
 rs/algorithms/recommendation/TriUHV.pyc
+
+*.pyc
+
+*.pyc
+
+*.pyc
+
+rs/algorithms/recommendation/__init__.pyc

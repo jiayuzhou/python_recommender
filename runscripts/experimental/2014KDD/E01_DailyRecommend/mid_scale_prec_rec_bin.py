@@ -12,6 +12,7 @@ from rs.algorithms.recommendation.HierLat import HierLat
 from rs.algorithms.recommendation.NMF import NMF
 from rs.algorithms.recommendation.PMF import PMF
 from rs.algorithms.recommendation.TriUHV import TriUHV;
+from rs.algorithms.recommendation.item_item_sim import item_item_sim
 
 
 if __name__ == '__main__':
@@ -20,8 +21,16 @@ if __name__ == '__main__':
     
     if len(sys.argv) == 1:
         print 'Use default sample data.'
+        min_occ_user = 5;
+        min_occ_prog = 10;
+        leave_k_out = 1; # perform leave k out. 
+        top_n = 5; # performance computed on top N;
     else:
         daily_data_file = sys.argv[1];
+        # filtering criteria
+        min_occ_user = 35;
+        min_occ_prog = 300;
+        top_n = 50; # performance computed on top N;
         
     if len(sys.argv) <= 2:
         print 'Use default latent factor.'
@@ -36,12 +45,6 @@ if __name__ == '__main__':
     
     exp_name = 'bin_exp_mid_prec_rec'; # something meaningful. 
     
-    # filtering criteria
-    min_occ_user = 35;
-    min_occ_prog = 300;
-    
-    top_n = 50; # performance computed on top N; 
-    
     leave_k_out = 10; # perform leave k out. 
     
     # number of repetitions. 
@@ -50,7 +53,10 @@ if __name__ == '__main__':
     # recommendation algorithms 
     method_list = [ LMaFit(latent_factor=lafactor), RandUV(latent_factor=lafactor), \
                     HierLat(latent_factor=lafactor), NMF(latent_factor=lafactor),
-                    PMF(latent_factor=lafactor),     TriUHV(latent_factor=lafactor)  ];
+                    PMF(latent_factor=lafactor),     TriUHV(latent_factor=lafactor),
+                    item_item_sim(N = lafactor) ];
+                    
+    #method_list = [ item_item_sim(N = lafactor) ];
                    
     #method_list = [ PMF(latent_factor=lafactor),     TriUHV(latent_factor=lafactor)  ];
     
