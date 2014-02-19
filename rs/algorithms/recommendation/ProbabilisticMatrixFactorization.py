@@ -1,10 +1,13 @@
-
+'''
+PMF core algorithm 
+'''
 import numpy as np
 
 
 class ProbabilisticMatrixFactorization():
 
-    def __init__(self, rating_tuples, latent_d=1, lamb = 0.1, learning_rate = 0.0001):
+    def __init__(self, rating_tuples, latent_d=1, lamb = 0.1, learning_rate = 0.0001,\
+                  num_users = None, num_items = None):
         self.latent_d = latent_d;
         self.learning_rate = learning_rate;
         self.regularization_strength = lamb;
@@ -12,8 +15,15 @@ class ProbabilisticMatrixFactorization():
         self.ratings = np.array(rating_tuples).astype(float)
         self.converged = False
 
-        self.num_users = int(np.max(self.ratings[:, 0]) + 1)
-        self.num_items = int(np.max(self.ratings[:, 1]) + 1)
+        if num_users is None:
+            self.num_users = int(np.max(self.ratings[:, 0]) + 1)
+        else:
+            self.num_items = num_users;
+            
+        if num_items is None:
+            self.num_items = int(np.max(self.ratings[:, 1]) + 1)
+        else:
+            self.num_items = num_items;
         
         print (self.num_users, self.num_items, self.latent_d)
         print self.ratings

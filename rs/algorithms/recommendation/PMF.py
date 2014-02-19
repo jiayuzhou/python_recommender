@@ -2,7 +2,9 @@
 Created on Jan 31, 2014
 
 @author: Shiyu C. (s.chang1@partner.samsung.com)
-
+    
+Modified by Jiayu Zhou on Feb. 
+    Modified interface, fixed bugs. 
 '''
 
 import numpy as np;
@@ -75,7 +77,8 @@ class PMF(CFAlg):
         ratings =  zip(feedback_data.data_row,feedback_data.data_col, feedback_data.data_val);
         
         pmf = ProbabilisticMatrixFactorization(ratings, latent_d=r, \
-                                lamb = self.lamb, learning_rate = self.learn_rate);
+                                lamb = self.lamb, learning_rate = self.learn_rate,\
+                                self.row, self.col);
                                 
         liks = []
         
