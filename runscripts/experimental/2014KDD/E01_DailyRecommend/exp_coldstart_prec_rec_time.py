@@ -63,8 +63,8 @@ if __name__ == '__main__':
     total_iteration = 2;
     
     # recommendation algorithms RandUV(latent_factor=lafactor),
-    method_list = [ LMaFit(latent_factor=lafactor),  \
-                    HierLat(latent_factor=lafactor), NMF(latent_factor=lafactor),
+    method_list = [ HierLat(latent_factor=lafactor, cold_start = HierLat.CS_EQUAL_PROB),  \
+                    LMaFit(latent_factor=lafactor),  NMF(latent_factor=lafactor),
                     PMF(latent_factor=lafactor),     TriUHV(latent_factor=lafactor)  ];
     
     # main method. 
