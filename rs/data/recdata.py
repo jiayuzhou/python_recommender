@@ -124,7 +124,18 @@ class FeedbackData(GenericData):
         mat_blind[:, blind_k_out_idx] = 0;
         mat_rest [:, list(set(range(self.num_col)) - set(blind_k_out_idx))] = 0;
         
-        return [mat_blind.tocoo(), mat_rest.tocoo()];
+        mat_blind = mat_blind.tocoo();
+        mat_rest  = mat_rest.tocoo();
+        
+        #blinded for training
+        blind_fbdata = FeedbackData(mat_blind.row.tolist(), mat_blind.col.tolist(), mat_blind.data.tolist(),\
+                                  self.num_row, self.num_col, self.row_mapping, self.col_mapping, self.meta);
+        
+        #the rest of data for testing. 
+        rest_fbdata = FeedbackData(mat_rest.row.tolist(), mat_rest.col.tolist(), mat_rest.data.tolist(),\
+                                  self.num_row, self.num_col, self.row_mapping, self.col_mapping, self.meta);
+                                  
+        return [blind_fbdata, rest_fbdata];
     
     def leave_k_out(self, leave_k_out_idx):
         '''
