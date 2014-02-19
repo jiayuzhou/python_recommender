@@ -18,7 +18,7 @@ class ProbabilisticMatrixFactorization():
         if num_users is None:
             self.num_users = int(np.max(self.ratings[:, 0]) + 1)
         else:
-            self.num_items = num_users;
+            self.num_users = num_users;
             
         if num_items is None:
             self.num_items = int(np.max(self.ratings[:, 1]) + 1)
