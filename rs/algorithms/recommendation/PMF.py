@@ -78,7 +78,7 @@ class PMF(CFAlg):
         
         pmf = ProbabilisticMatrixFactorization(ratings, latent_d=r, \
                                 lamb = self.lamb, learning_rate = self.learn_rate,\
-                                self.row, self.col);
+                                num_users = self.row, num_items = self.col);
                                 
         liks = []
         
