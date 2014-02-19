@@ -41,7 +41,7 @@ if __name__ == '__main__':
                        '/hadoop05/home/jiayu.zhou/data/agg_duid_pid_watchtime_genre/20140206/part-r-00000',
                        '/hadoop05/home/jiayu.zhou/data/agg_duid_pid_watchtime_genre/20140207/part-r-00000'
                        ]
-    exp_name = 'exp_map_Feb1to7_randsplit_bin';
+    exp_name = 'exp_map_Feb1to7_coldstart_bin';
     # filtering criteria.
     min_occ_user = 50;
     min_occ_prog = 1000;
