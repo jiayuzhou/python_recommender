@@ -35,9 +35,15 @@ class HierLat(CFAlg):
     '''
     ALG_NAME = 'HierLat';
     
+    CS_EQUAL_PROB = 'cs_equal_prob'; # equal probability 
+    CS_ALL_AVG    = 'cs_all_avg';    # all average and then normalize.
+    CS_OBS_AVG    = 'cs_obs_avg';    # average at observe and then normalize. 
+    
+    CS_STRATEGIES = [CS_EQUAL_PROB, CS_ALL_AVG, CS_OBS_AVG];
+    
 ##################################################################################################
 
-    def __init__(self, latent_factor = 20, lamb = 1e-3, stop_delta = 1e-4, maxiter = 1e2, verbose = False):
+    def __init__(self, latent_factor = 20, lamb = 1e-3, stop_delta = 1e-4, maxiter = 1e2, verbose = False, cold_start = None):
         '''
         Constructor
         '''
@@ -46,16 +52,27 @@ class HierLat(CFAlg):
         self.lamb = lamb;
         self.delta = stop_delta; 
         self.maxiter = maxiter;
-        
-        log('HierLat algorithm instance created: latent factor ' + str(self.latent_factor));
-        
         self.verbose = verbose;
-        
         self.optimizer = Opt_SpaRSA(verbose = 1);
         
+        self.cold_start = cold_start;
+        
+        if self.cold_start is None:
+            log('HierLat algorithm instance created: latent factor ' + str(self.latent_factor) + ' no cold start strategy.');
+        else:
+            if not cold_start in HierLat.CS_STRATEGIES:
+                raise ValueError('Unknown Cold Start Strategy: '+ str(cold_start));
+            
+            log('HierLat algorithm instance created: latent factor ' + str(self.latent_factor) + \
+                 ' cold start strategy: ' + self.cold_start);
+        
     def unique_str(self):
-        return HierLat.ALG_NAME + '_k' + str(self.latent_factor) + '_lam' + str(self.lamb) + \
-            '_maxIter' + str(self.maxiter) + '_stopCri' + str(self.delta); 
+        if self.cold_start is None:
+            return HierLat.ALG_NAME + '_k' + str(self.latent_factor) + '_lam' + str(self.lamb) + \
+                '_maxIter' + str(self.maxiter) + '_stopCri' + str(self.delta);
+        else:
+            return HierLat.ALG_NAME + '_k' + str(self.latent_factor) + '_lam' + str(self.lamb) + \
+                '_maxIter' + str(self.maxiter) + '_stopCri' + str(self.delta) + '_cs' + str(self.cold_start);
         
     def train(self, feedback_data, simplex_projection = True):
         '''
@@ -106,21 +123,6 @@ class HierLat(CFAlg):
         # S_sparse = S_sparse.tolil();
         # print S_sparse.row
         
-#         ###############################
-#         # check the gradient 
-#         S_U = np.matrix(np.random.rand(m, r));
-#         S_H = np.matrix(np.random.rand(r,g));
-#         S_V = scipy.sparse.coo_matrix((V_val,(meta['pggr_gr'],meta['pggr_pg'])),shape = (g,n));
-#         HierLat.check_Vgradient (S_sparse,U,S_U,H,S_H,V,S_V,lamb)         
-
-        ###############################
-        # the main learning process
-        # U = HierLat.CGF_learnU (S_sparse,U,U,H,H,V,V,lamb);
-        # H = HierLat.CGF_learnH (S_sparse,U,U,H,H,V,V);
-        # V = HierLat.CGF_learnV (S_sparse,U,U,H,H,V,V,lamb);
-        # S_sparse = HierLat.CGF_learnS (S_sparse,U,H,V,feedback_data);
-        
-        
         # core learning. 
         if simplex_projection:
             [U, H, V, S_sparse] = self.learn_simplex_proj(S_sparse, U, H, V, feedback_data);
@@ -132,8 +134,30 @@ class HierLat(CFAlg):
         self.V = V;
         self.S_sparse = S_sparse;
         
+        # process cold start items.
+        if not self.cold_start is None: 
+            # 1. find cold start item indices. 
+            cs_col = feedback_data.get_cold_start_col();
+            if len(cs_col) > 0:
+                if self.cold_start == HierLat.CS_EQUAL_PROB:
+                    Vcsc = V.tocsc(); # obtain a CSC matrix . 
+                    for cs_col_idx in cs_col:
+                        Vcsc.data[range(Vcsc.indptr[cs_col_idx], Vcsc.indptr[cs_col_idx + 1])] \
+                                = 1/float(Vcsc.indptr[cs_col_idx + 1] - Vcsc.indptr[cs_col_idx]);
+                    self.V = Vcsc;
+                    
+                elif self.cold_start == HierLat.CS_OBS_AVG:
+                    raise NotImplementedError('Not implemented');
+                    #TODO: implement, average over all observed genre. 
+                    pass;
+                
+                elif self.cold_start == HierLat.CS_ALL_AVG:
+                    raise NotImplementedError('Not implemented');
+                    #TODO: implement, average over all genre. 
+                    pass;
+            
         self.HV = H * V;
-        
+
         if self.verbose:
             log('HierLat algorithm trained.');
 

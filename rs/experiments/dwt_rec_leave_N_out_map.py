@@ -112,7 +112,7 @@ def experiment_leave_k_out_map(exp_name,     daily_data_file,\
         result[method.unique_str()] = perf_vect;
     
     return result;
-    
+
 def experiment_unit_leave_k_out_map(exp_id, method, data_tr, data_left, iteration, max_rank):
     '''
     This method works on the column/row index of the data_tr and data_left, and 
@@ -202,3 +202,107 @@ def experiment_unit_leave_k_out_map(exp_id, method, data_tr, data_left, iteratio
     eval_result['recall']    = perf_vect_rec; 
     eval_result['RMSE']      = rmse(data_left.data_val, method.predict(data_left.data_row, data_left.data_col));
     return eval_result;
+
+
+def experiment_coldstart_map(exp_name,     daily_data_file,\
+                    min_occ_user, min_occ_prog, num_user, num_prog,\
+                    method_list, blind_k_out, total_iteration, max_rank, binary = False):
+    '''
+    
+    Parameters
+    ----------
+    @param exp_name:       the experiment name (prefix) 
+    @param daily_datafile: a list of files. 
+    @param min_occ_user:   cold start user criteria
+    @param min_occ_prog:   cold start user criteria
+    @param num_user:       the number of users selected in the experiment. 
+    @param num_prog:       the number of programs selected in the experiment. 
+    @param method_list:
+    @param blind_k_out: leave k out for each user. The k must be strict less than
+         min_occ_user
+    
+    @param binary: if this is set to true then the binary data is used (non-zero set to 1). 
+    
+    Returns
+    ----------
+    @return out 
+    '''
+    
+    print 'Blind k out: k = ', str(blind_k_out);
+    print 'Min_occ_user: ',    str(min_occ_user);
+    print 'Min_occ_prog: ',    str(min_occ_prog);
+    
+    if blind_k_out >= min_occ_user:
+        raise ValueError('The k in the leave k out [' + str(blind_k_out) 
+                         +'] should be strictly less than min_occ_user [' + str(min_occ_user) +'].'); 
+    
+    # define lko_log style. 
+    lko_log = lambda msg: Logger.Log(msg, Logger.MSG_CATEGORY_EXP);
+    
+    
+    if isinstance(daily_data_file, list):    
+        hash_file_str = str(hash(tuple(daily_data_file)));
+    else:
+        hash_file_str = str(hash(daily_data_file));
+    
+    # construct exp_id
+    if binary:
+        exp_id = 'cst_bi_' + exp_name + '_data' + hash_file_str\
+                      + '_mu' + str(min_occ_user) + '_mp' + str(min_occ_prog) \
+                      + '_nu' + str(num_user) + '_np' + str(num_prog) \
+                      + '_k' + str(blind_k_out) + '_toiter' + str(total_iteration);
+    else:
+        exp_id = 'cst_'    + exp_name + '_data' + hash_file_str\
+                      + '_mu' + str(min_occ_user) + '_mp' + str(min_occ_prog) \
+                      + '_nu' + str(num_user) + '_np' + str(num_prog) \
+                      + '_k' + str(blind_k_out) + '_toiter' + str(total_iteration);
+    lko_log('Experiment ID: ' + exp_id);
+    
+    # load data. 
+    lko_log('Read data...');
+    reader = DailyWatchTimeReader();
+    data = reader.read_file_with_minval(daily_data_file, min_occ_user, min_occ_prog, num_user, num_prog);
+    lko_log('Data loaded: ' + str(data));
+    
+    if binary:
+        lko_log('Binarizing data...');
+        data.binarize();
+    else:
+        # normalize 
+        lko_log('Normalizing data...');
+        data.normalize_row();
+    
+    result = {};
+    
+    for method in method_list:
+        # do for each method
+    
+        perf_vect = [];
+        for iteration in range(total_iteration):
+            # do for each iteration for each method. 
+    
+            lko_log('Method: '+ method.unique_str() + ' Iteration: '+ str(iteration));
+    
+            # data split of the current iteration. 
+            split_resource_str = 'exp' + exp_id + '_blind_idx_iter' + str(iteration); 
+            split_dir = exp_id + '/blind_idx';
+            blind_out_idx = URM.LoadResource(URM.RTYPE_RESULT, split_resource_str, split_dir);
+            if not blind_out_idx:
+                # randomly generate k items to blind out.
+                blind_out_idx   = ds.sample_num(data.num_col, blind_k_out);    
+                URM.SaveResource(URM.RTYPE_RESULT, split_resource_str, blind_out_idx, split_dir);
+            
+            # split the k items as a separate. 
+            [data_tr, data_left] = data.leave_k_out(blind_out_idx); 
+            
+            iter_result = experiment_unit_leave_k_out_map(exp_id, method, \
+                                    data_tr, data_left, iteration, max_rank);
+            
+            perf_vect.append(iter_result);
+    
+        result[method.unique_str()] = perf_vect;
+    
+    return result;
+
+
+

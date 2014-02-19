@@ -44,15 +44,47 @@ class FeedbackData(GenericData):
      
     def get_sparse_matrix(self):
         '''
-        Construct a sparse matrix (coo_matrix) from current Feedback data content.  
+        Construct a sparse matrix (coo_matrix) from current Feedback data content.
+        
+        TODO: cache the data matrix. 
+        --------
+        @return: the COO sparse matrix representation of the current data.   
         '''
         mat = coo_matrix((self.data_val, (self.data_row, self.data_col)), \
                      shape = (self.num_row, self.num_col));
         return mat;
     
+    def get_cold_start_col(self):
+        '''
+        Get a list of indices of columns that have no values, i.e., the cold start columns.
+        
+        Returns
+        ---------
+        @return: a list of 0-based column indices.
+        '''
+        # get a column compressed matrix cc, then we have access to cc.indptr.  
+        cc = self.get_sparse_matrix().tocsc();
+        # if a column has no elements then in cc.indptr[col] = cc.indptr[col + 1];
+        cs_col = [i for i in range(cc.shape[1]) if cc.indptr[i] == cc.indptr[i+1]];
+        return cs_col;
+    
+    def get_cold_start_row(self):
+        '''
+        Get a list of indices of rows that have no values, i.e., the cold start rows.
+        
+        Returns
+        ---------
+        @return: a list of 0-based row indices.
+        '''
+        # get a row compressed matrix rr, then we have access to rr.indptr.  
+        rr = self.get_sparse_matrix().tocsr();
+        # if a row has no elements then in rr.indptr[row] = rr.indptr[row + 1];
+        cs_row = [i for i in range(rr.shape[0]) if rr.indptr[i] == rr.indptr[i+1]];
+        return cs_row;
+    
     def binarize(self):
         '''
-        Change all to one. 
+        Change all non-zero values (data) to one. 
         '''
         self.data_val = [1] * len(self.data_val); 
     
@@ -73,11 +105,39 @@ class FeedbackData(GenericData):
         self.data_val = mat.data.tolist();
         self.data_row = mat.row.tolist();
         self.data_col = mat.col.tolist();
+    
+    def blind_k_out(self, blind_k_out_idx):
+        '''
+        Construct blind k out dataset (and remaining).
         
+        Parameters
+        ----------
+        @param blind_k_out_idx
+        
+        Return
+        @return out
+        '''
+        mat = self.get_sparse_matrix();
+        mat_blind = mat.tolil();
+        mat_rest  = mat.tolil();
+        
+        mat_blind[:, blind_k_out_idx] = 0;
+        mat_rest [:, list(set(range(self.num_col)) - set(blind_k_out_idx))] = 0;
+        
+        return [mat_blind.tocoo(), mat_rest.tocoo()];
+    
     def leave_k_out(self, leave_k_out_idx):
         '''
         Construct leave-k-out dataset (and remaining). 
         See test_recdata_leavekout.py for example. 
+        
+        Parameters
+        ----------
+        @param leave_k_out_idx
+        
+        Returns
+        ----------
+        @return out
         '''
         
         # get the sparse matrix. 
@@ -152,11 +212,11 @@ class FeedbackData(GenericData):
         
         Parameters
         ----------
-        sel_idx: a list of row indices. The row index set can have duplicated entries.  
+        @param sel_idx: a list of row indices. The row index set can have duplicated entries.  
         
         Returns
         ----------
-        out: a new FeedbackData instance whose rows are given in sel_idx 
+        @return out: a new FeedbackData instance whose rows are given in sel_idx 
              in the original set. 
         '''
         # check if the indices are good. 
@@ -226,11 +286,11 @@ class FeedbackData(GenericData):
         
         Parameters
         ----------
-        sel_row_num: the number of selected rows. 
+        @param sel_row_num: the number of selected rows. 
         
         Returns
         ----------
-        out: a list of two components [sample_data, selidx]
+        @return out: a list of two components [sample_data, selidx]
         sample_data: 
         sel_idx:
         '''
@@ -249,11 +309,11 @@ class FeedbackData(GenericData):
         
         Parameters
         ----------
-        percentage: the percentage of data split. 
+        @param percentage: the percentage of data split. 
         
         Returns
         ----------
-        out: a list [data_split, data_split_comp, selidx_split, selidx_split_comp]
+        @return out: a list [data_split, data_split_comp, selidx_split, selidx_split_comp]
         data_split: a Feedback data of percentage, whose index (in the full data set) 
                     is given in selidx_split
         data_split_comp: a Feedback data of 1- percentage, whose index is given 
@@ -277,12 +337,12 @@ class FeedbackData(GenericData):
         
         Parameters
         ----------
-        fold_num:    the 0-based fold index [0..total_fold-1] 
-        total_fold:  the total number the (n) of n-fold. 
+        @param fold_num:    the 0-based fold index [0..total_fold-1] 
+        @param total_fold:  the total number the (n) of n-fold. 
         
         Returns
         ----------
-        out: [fold_data, sel_idx]
+        @return out: [fold_data, sel_idx]
         fold_data: Feedback data structure. 
         sel_idx: fold index
         '''
@@ -310,12 +370,12 @@ def share_row_data(fb_data1, fb_data2):
     
     Parameters
     ----------
-    fb_data1:
-    fb_data2:
+    @param fb_data1:
+    @param fb_data2:
     
     Returns
     ----------
-    out: [fb_data1_share, fb_data2_share]
+    @return out: [fb_data1_share, fb_data2_share]
     fb_data1_share: 
     fb_data2_share: 
     '''

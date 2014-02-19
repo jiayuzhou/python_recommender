@@ -61,8 +61,20 @@ class NMF(CFAlg):
         print 'Solve W...';
         self.W = nmf.fit_transform(data_mat);
         
-        self.H = np.matrix(self.H);
+        
         self.W = np.matrix(self.W);
+        self.H = np.matrix(self.H);
+        
+        # process cold start items.
+        # 1. find cold start item indices. 
+        cs_col = feedback_data.get_cold_start_col();
+        Hm = self.H;
+        if len(cs_col) > 0:
+            # 2. compute column average of V on non-cold start indices.
+            ncs_col = list(set(range(self.col)) - set(cs_col));
+            Hsum = np.sum(Hm[:, ncs_col], 1)/float(len(ncs_col));
+            # 3. fill back to to V.
+            Hm[:, cs_col] = Hsum; # assign back to cold start columns.  
         
         if self.verbose:
             mcpl_log('NMF model trained.');
