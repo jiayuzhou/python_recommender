@@ -160,6 +160,14 @@ def experiment_unit_leave_k_out_map(exp_id, method, data_tr, data_left, iteratio
     for user_idx in range(data_left.num_row): 
         # predict the entire row. 
         
+        
+        # test column index;
+        lo_col = set(np.nonzero(lo_data_csr[user_idx, :])[1].tolist());
+        
+        # there is no testing on this user. 
+        if len(lo_col) == 0:
+            continue;
+        
         #pred_row = [user_idx] * col_num;
         #row_pred = method.predict(pred_row, pred_col);
         row_pred = method.predict_row(user_idx, pred_col);
@@ -170,8 +178,7 @@ def experiment_unit_leave_k_out_map(exp_id, method, data_tr, data_left, iteratio
         # trained columns.
         tr_col = set(np.nonzero(tr_data_csr[user_idx, :])[1].tolist());
         
-        # test column index;
-        lo_col = set(np.nonzero(lo_data_csr[user_idx, :])[1].tolist());
+        
         
         # remove the trained column from prediction. 
         # this contains a set of indices that predicted (excluding training items).
