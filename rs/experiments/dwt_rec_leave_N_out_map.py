@@ -292,9 +292,11 @@ def experiment_coldstart_map(exp_name,     daily_data_file,\
                 blind_out_idx   = ds.sample_num(data.num_col, blind_k_out);    
                 URM.SaveResource(URM.RTYPE_RESULT, split_resource_str, blind_out_idx, split_dir);
             
+            lko_log('Blind index done.');
             # split the k items as a separate. 
             [data_tr, data_left] = data.blind_k_out(blind_out_idx); 
             
+            lko_log('Start index');
             iter_result = experiment_unit_leave_k_out_map(exp_id, method, \
                                     data_tr, data_left, iteration, max_rank);
             
