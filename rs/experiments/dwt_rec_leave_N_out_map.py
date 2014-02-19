@@ -293,7 +293,7 @@ def experiment_coldstart_map(exp_name,     daily_data_file,\
                 URM.SaveResource(URM.RTYPE_RESULT, split_resource_str, blind_out_idx, split_dir);
             
             # split the k items as a separate. 
-            [data_tr, data_left] = data.leave_k_out(blind_out_idx); 
+            [data_tr, data_left] = data.blind_k_out(blind_out_idx); 
             
             iter_result = experiment_unit_leave_k_out_map(exp_id, method, \
                                     data_tr, data_left, iteration, max_rank);
