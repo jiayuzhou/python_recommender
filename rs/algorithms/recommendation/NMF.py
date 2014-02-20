@@ -51,6 +51,8 @@ class NMF(CFAlg):
         ----------
         no return.  
         '''
+        self.row = feedback_data.num_row;
+        self.col = feedback_data.num_col;
         
         data_mat = feedback_data.get_sparse_matrix().tocsr();
         
@@ -129,6 +131,8 @@ if __name__ == '__main__':
     # build model with 3 latent factors.
     r = 5;
     
+    [f1, f2] = feedback_data.blind_k_out([1]);
+    
     NMF_model = NMF(latent_factor = 2);
-    NMF_model.train(feedback_data);
+    NMF_model.train(f1);
         
