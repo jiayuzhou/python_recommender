@@ -119,11 +119,11 @@ class TriUHV(CFAlg):
         # process cold start items.
         # 1. find cold start item indices. 
         cs_col = feedback_data.get_cold_start_col();
-        Vm = self.V.tocsc();
+        Vm = self.V.tolil();
         if len(cs_col) > 0:
             # 2. compute column average of V on non-cold start indices.
             ncs_col = list(set(range(self.col)) - set(cs_col));
-            Vsum = np.sum(Vm[:, ncs_col], 1)/float(len(ncs_col));
+            Vsum = Vm[:, ncs_col].sum(axis = 1)/float(len(ncs_col));
             # 3. fill back to to V.
             Vm[:, cs_col] = Vsum; # assign back to cold start columns.  
             self.V = Vm;  

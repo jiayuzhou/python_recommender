@@ -36,13 +36,14 @@ if __name__ == '__main__':
     print LMaFit_model.predict(loc_row, loc_col);
     
     
-#     # test cold start.
-#     row =  [0, 0, 1, 1, 2, 3, 3];
-#     col =  [0, 3, 1, 4, 0, 1, 3];
-#     data = [1, 1, 1, 1, 1, 1, 1];
-#     
-#     fbdata = FeedbackData(row, col, data, 4, 5, {}, {}, {}); 
-#     LMaFit_model = LMaFit(2, 0.001, 1e-5, 100);
-#     LMaFit_model.train(fbdata);
+    # test cold start.
+    row =  [0, 0, 1, 1, 2, 3, 3];
+    col =  [0, 3, 1, 4, 0, 1, 3];
+    data = [1, 1, 1, 1, 1, 1, 1];
+     
+    fbdata = FeedbackData(row, col, data, 4, 5, {}, {}, {}); 
+    LMaFit_model = LMaFit(2, 0.001, 1e-5, 100);
+    LMaFit_model.train(fbdata);
+    
     
     
