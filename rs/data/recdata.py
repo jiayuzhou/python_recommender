@@ -37,7 +37,10 @@ class FeedbackData(GenericData):
         
         self.row_mapping = row_mapping.copy();
         self.col_mapping = col_mapping.copy();
-        self.meta        = meta_data.copy();
+        if meta_data: 
+            self.meta        = meta_data.copy();
+        else:
+            self.meta        = [];
     
     def __str__(self):
         return 'Row#:' + str(self.num_row) + ' Col#:' + str(self.num_col) + ' Element:'+ str(len(self.data_val));
@@ -252,9 +255,10 @@ class FeedbackData(GenericData):
         data_row = mat.row.tolist();
         data_col = mat.col.tolist();
         
+        
         newdata = FeedbackData(data_row, data_col, data_val, len(sel_idx), self.num_col,\
                   row_mapping, self.col_mapping, self.meta); # generate new data 
-                  
+              
         return newdata;
     
     def subdata_col(self, sel_idx):
