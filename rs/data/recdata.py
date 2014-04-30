@@ -10,11 +10,17 @@ from scipy.sparse import coo_matrix, csr_matrix;
 import numpy as np;
 import random #@UnusedImport
 import rs.data.data_split as ds;
+from copy import deepcopy
+
+
 
 class FeedbackData(GenericData):
     '''
     A data structure for typical recommender system.  
     '''
+    
+    METAKEY_ROW_FEATURE = 'row_feature';
+    METAKEY_COL_FEATURE = 'col_feature';
     
     def __init__(self, data_row, data_col, data_val, num_row, num_col,\
                   row_mapping = None, col_mapping = None, meta_data = None):
@@ -40,10 +46,42 @@ class FeedbackData(GenericData):
         if meta_data: 
             self.meta        = meta_data.copy();
         else:
-            self.meta        = [];
+            self.meta        = [];        
     
     def __str__(self):
-        return 'Row#:' + str(self.num_row) + ' Col#:' + str(self.num_col) + ' Element:'+ str(len(self.data_val));
+        if self.meta:
+            return 'Row#:' + str(self.num_row) + ' Col#:' + str(self.num_col) + ' Element:'+ str(len(self.data_val)) + ' Meta available.';
+        else:
+            return 'Row#:' + str(self.num_row) + ' Col#:' + str(self.num_col) + ' Element:'+ str(len(self.data_val));
+     
+    def attach_col_feature(self, col_feature_map):
+        '''
+        This process attaches column-wise features. 
+        
+        @param col_feature_map: a <key,value> mapping where key corresponds to the 
+                keys in the self.col_mapping, and the value is feature vector. Could be  
+                any object. 
+                
+                For format of the feature object refer to the algorithms that utilizes
+                the information.
+                
+                This builds col_feature stored in self.meta[METAKEY_COL_FEATURE]
+                col_feature: kk, vv => kk: idx, vv: feature
+        '''
+        
+        if not self.meta:
+            self.meta = {};
+        
+        # the following list comprehension performs the following. 
+        # for each kk,vv in col_mapping (kk: pid, vv: id)
+        #    if kk in col_feature_map
+        #        col_feature[vv] = col_feature_map[kk]
+        #    else
+        #        col_feature[vv] = []
+        col_feature = dict([ (vv, col_feature_map[kk]) if kk in col_feature_map \
+                        else (vv, []) for kk,vv in self.col_mapping.iteritems() ])  
+        
+        self.meta[FeedbackData.METAKEY_COL_FEATURE] = col_feature;
      
     def get_sparse_matrix(self):
         '''
@@ -370,9 +408,42 @@ class FeedbackData(GenericData):
 
 
 
+def merge_data(fb_data1, fb_data2, fb_data1_col_iden = None, fb_data2_col_iden = None):
+    '''
+    Merge two Feedback data structures. 
+    
+    An optional operation before merge is to add identifications to the column mappings keywords  
+    '''
+    
+    # if identifier is defined, add identifiers to the mapping keywords. 
+    if fb_data1_col_iden:
+        fb_data1 = deepcopy(fb_data1)
+        fb_data1.col_mapping = dict([ (fb_data1_col_iden + ':'+kk, vv) \
+                                     for kk, vv in fb_data1.col_mapping.iteritems() ])
+    if fb_data2_col_iden:
+        fb_data2 = deepcopy(fb_data2)
+        fb_data2.col_mapping = dict([ (fb_data2_col_iden + ':'+kk, vv) \
+                                     for kk, vv in fb_data2.col_mapping.iteritems() ])
+    
+    # prepare to merge.
+    merge_row  = []
+    merge_col  = []
+    merge_data = []
+    
+    merge_row_keyset = set(fb_data1.row_mapping.keys()).union(fb_data2.row_mapping.keys())
+    merge_col_keyset = set(fb_data1.col_mapping.keys()).union(fb_data2.col_mapping.keys())
 
-
-
+    merge_row_mapping = dict([ (kk, vv) for kk, vv in enumerate(sorted(merge_row_keyset)) ])
+    merge_col_mapping = dict([ (kk, vv) for kk, vv in enumerate(sorted(merge_col_keyset)) ])
+    
+    fb_data1_col_remap
+    fb_data1_row_remap
+    fb_data2_col_remap
+    fb_data2_row_remap
+    
+    
+    print merge_row_mapping
+    print merge_col_mapping
 
 def share_row_data(fb_data1, fb_data2):
     '''

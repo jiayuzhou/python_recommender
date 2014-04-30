@@ -12,10 +12,10 @@ import random;
 
 class UtilityDataReader(object):
 
-    def __init__(self):     
+    def __init__(self, fieldDelimiter = '\t'):     
         # the mapping from field to meanings. 
         self.fieldMapping = {'duid':0, 'pid':1, 'watchtime':2};
-        self.fieldDelimiter = '\t';
+        self.fieldDelimiter = fieldDelimiter;
         self.verbose = True;
         self.display = 100000; # gives output after this number of lines are read. 
     
@@ -250,7 +250,9 @@ class UtilityDataReader(object):
                 ' ( '+str(len(mapping_duid))+' row/user, '+str(len(mapping_pid))+' col/program).');
         
         
-        return [mapping_duid, mapping_pid, row, col, data];
+        #return [mapping_duid, mapping_pid, row, col, data];
                 
-    
-                
+        result = FeedbackData(row, col, data, len(mapping_duid), len(mapping_pid),\
+                    mapping_duid, mapping_pid, [])
+        
+        return result 
